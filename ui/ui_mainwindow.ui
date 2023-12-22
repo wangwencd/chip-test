@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ui_MainWindow</class>
+ <widget class="QMainWindow" name="ui_MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>967</width>
+    <height>855</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Transepic_AutoTest_V2.06.00 </string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+QMenuBar{
+	color: rgb(0, 0, 0);
+	border-color: rgb(0, 0, 0);
+}
+
+QGroupBox{
+	font: 75 italic 12pt &quot;Arial&quot;;
+}
+
+QTabWidget{
+	background-color: rgb(240, 240, 240);
+}
+
+QWidget{
+	background-color: rgb(240, 240, 240);
+}
+
+QLabel{
+	font: 9pt &quot;Arial&quot;;
+}
+
+
+QPushButton:hover{
+	background-color: rgb(216, 227, 255);
+}
+QPushButton:pressed{
+	border-style:inset
+}
+
+
+</string>
+  </property>
+  <widget class="QWidget" name="widget_main">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0" rowspan="3">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Function</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QToolBox" name="toolBox_function">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="page_battery_lab">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>180</width>
+            <height>69</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Battery lab</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QRadioButton" name="radioButton_battery_lab">
+             <property name="text">
+              <string>Battery lab</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_custom_test">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>180</width>
+            <height>69</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Custom test</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QRadioButton" name="radioButton_custom_test">
+             <property name="text">
+              <string>Custom test</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_lithium_test">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>180</width>
+            <height>100</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Lithium test</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QRadioButton" name="radioButton_lithium_test_accuracy">
+             <property name="text">
+              <string>Accuracy</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_lithium_test_dnl">
+             <property name="text">
+              <string>DNL</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_lithium_test_deviation">
+             <property name="text">
+              <string>Deviation</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_lithium_test_bgr">
+             <property name="text">
+              <string>BGR</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_venus_test">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>180</width>
+            <height>69</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Venus test</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="QRadioButton" name="radioButton_venus_test_trim">
+             <property name="text">
+              <string>Trim</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_jupiter_test">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>180</width>
+            <height>78</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <attribute name="label">
+           <string>Jupiter test</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QRadioButton" name="radioButton_jupiter_test_ramp">
+             <property name="text">
+              <string>Ramp</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_jupiter_test_ramp_multi">
+             <property name="text">
+              <string>Ramp multi</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_jupiter_test_noise">
+             <property name="text">
+              <string>Noise</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_natrium_test">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>163</width>
+            <height>78</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Natrium test</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QRadioButton" name="radioButton_natrium_test_ramp">
+             <property name="text">
+              <string>Ramp</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_natrium_test_noise">
+             <property name="text">
+              <string>Noise</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_natrium_test_temperature">
+             <property name="text">
+              <string>Temperature</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QGroupBox" name="groupBox_config">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QGroupBox{
+	font: 75 italic 10pt &quot;Arial&quot;;
+	border-color: rgb(240, 240, 240);
+}
+
+QLineEdit{
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
+	font: 9pt &quot;Arial&quot;;
+}
+
+QLineEdit:hover{
+	background-color: rgb(216, 227, 255);
+}</string>
+      </property>
+      <property name="title">
+       <string>Config</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_config_configpath">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Config path</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_config_configpath"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_config_folder">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Folder</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QGroupBox" name="groupBox_output">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QGroupBox{
+	font: 75 italic 10pt &quot;Arial&quot;;
+	border-color: rgb(0, 0, 0);
+}
+
+QLineEdit{
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
+	font: 9pt &quot;Arial&quot;;
+}
+
+QLineEdit:hover{
+	background-color: rgb(216, 227, 255);
+}</string>
+      </property>
+      <property name="title">
+       <string>Output</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label_output_outputpath">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Output path</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_output_outputpath"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_output_folder">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Folder</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QGroupBox" name="groupBox_start">
+      <property name="title">
+       <string>Start</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_14">
+       <item row="0" column="1">
+        <widget class="QPushButton" name="pushButton_start_stop">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton{
+	font: 14pt &quot;Arial&quot;;
+}</string>
+         </property>
+         <property name="text">
+          <string>Stop</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pushButton_start_start">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton{
+	font: 14pt &quot;Arial&quot;;
+}</string>
+         </property>
+         <property name="text">
+          <string>Start</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="QWidget" name="widget_log" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>200</height>
+       </size>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="groupBox_log">
+         <property name="title">
+          <string>Log</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="2" column="0">
+           <widget class="QTextBrowser" name="textBrowser_log">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>967</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(240, 240, 240, 255), stop:1 rgba(255, 255, 255, 255));</string>
+   </property>
+   <widget class="QMenu" name="menu_debug">
+    <property name="title">
+     <string>Debug(D)</string>
+    </property>
+    <addaction name="action_instrument"/>
+    <addaction name="action_mcu"/>
+   </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>Help(H)</string>
+    </property>
+    <addaction name="action_userguide"/>
+   </widget>
+   <addaction name="menu_debug"/>
+   <addaction name="menu_help"/>
+  </widget>
+  <action name="action_instrument">
+   <property name="text">
+    <string>Instrument</string>
+   </property>
+  </action>
+  <action name="action_userguide">
+   <property name="text">
+    <string>User Guide</string>
+   </property>
+  </action>
+  <action name="action_mcu">
+   <property name="text">
+    <string>MCU</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
