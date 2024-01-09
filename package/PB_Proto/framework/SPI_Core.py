@@ -61,7 +61,7 @@ def setspimesg(**kwargs):
 def SPI_Proto_unpack_core(buf):
     pb_info = SPI_Proto_pb2.SPI_Proto()
     pb_info.ParseFromString(buf)
-    return pb_info.data_buf
+    return pb_info
 
 
 def SPI_Proto_pack_core(**kwargs):

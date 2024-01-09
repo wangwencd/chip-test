@@ -60,11 +60,34 @@ class Parse_Natrium:
             'Set_Voltage': np.array([]),
             'Data': np.array([]),
         }
-        condition.test_info['Temperature_Setting_Flag'] = bool(int(condition.test_info['Temperature_Setting_Flag']))
-        condition.test_info['Power_Setting_Flag'] = bool(int(condition.test_info['Power_Setting_Flag']))
-        condition.test_info['ADC_Setting_Flag'] = bool(int(condition.test_info['ADC_Setting_Flag']))
-        condition.test_info['ADC_Measurement_Flag'] = bool(int(condition.test_info['ADC_Measurement_Flag']))
-        condition.test_info['Control_Setting_Flag'] = bool(int(condition.test_info['Control_Setting_Flag']))
-        condition.test_info['Data_Average_Flag'] = bool(int(condition.test_info['Data_Average_Flag']))
+        if 'Temperature_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Temperature_Setting_Flag'] = bool(int(condition.test_info['Temperature_Setting_Flag']))
+        else:
+            condition.test_info['Temperature_Setting_Flag'] = True
+
+        if 'Power_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Power_Setting_Flag'] = bool(int(condition.test_info['Power_Setting_Flag']))
+        else:
+            condition.test_info['Power_Setting_Flag'] = True
+
+        if 'ADC_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['ADC_Setting_Flag'] = bool(int(condition.test_info['ADC_Setting_Flag']))
+        else:
+            condition.test_info['ADC_Setting_Flag'] = True
+
+        if 'ADC_Measurement_Flag' in condition.test_info.keys():
+            condition.test_info['ADC_Measurement_Flag'] = bool(int(condition.test_info['ADC_Measurement_Flag']))
+        else:
+            condition.test_info['ADC_Measurement_Flag'] = True
+
+        if 'Control_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Control_Setting_Flag'] = bool(int(condition.test_info['Control_Setting_Flag']))
+        else:
+            condition.test_info['Control_Setting_Flag'] = True
+
+        if 'Data_Average_Flag' in condition.test_info.keys():
+            condition.test_info['Data_Average_Flag'] = bool(int(condition.test_info['Data_Average_Flag']))
+        else:
+            condition.test_info['Data_Average_Flag'] = True
 
         return condition

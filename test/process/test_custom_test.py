@@ -5,11 +5,8 @@ Version: 3.8
 Date: 2022/8/22 9:53
 File: test_custom_test.py
 """
-import re
 import time
 import logging
-
-from parse.multiprocess.pool_thread import pool
 from test.device.flow.control_flow import Control_Flow
 from parse.process.parse_custom_test import Parse_Custom_Test
 
@@ -22,7 +19,7 @@ class Test_Custom_Test(Control_Flow):
     def __init__(self):
         super().__init__()
 
-    def determine_func(self, condition):
+    def exec_func(self, condition):
         """
         Determine specific operation of instrument
 
@@ -32,44 +29,20 @@ class Test_Custom_Test(Control_Flow):
         Returns:
             condition: Condition information summary
         """
-        function = condition.test_info['Function']  # Get function name from test info
-        if re.match('pass', function, re.I) is not None:  # Pass this step
+        function_key = list(condition.test_info['Function'].keys())[0]  # Get key string from Function dict
+        function_value = list(condition.test_info['Function'].values())[0]  # Get value string from Function dict
+        condition.test_info.update(condition.test_info['Parameter'])  # Get test parameter from Parameter
+
+        if function_key == 'nan':  # Function is empty
             return condition
 
-        if re.match('open', function, re.I) is not None:  # Open instrument
-            condition = self.open(condition)
-            return condition
+        elif function_value is None:  # Function has no function name
+            condition = eval('self.' + function_key)(condition)  # run single function without function name
 
-        elif re.match('prepare', function, re.I) is not None:  # Prepare instrument, such as enable remote, CLS
-            condition = self.prepare(condition)
-            return condition
-
-        elif re.match('measure', function, re.I) is not None:  # Measure value of instrument
-
-            if condition.test_info['Instrument'] != 'DL11B':
-                future1 = pool.submit(self.measure_VI_thread, condition)
-
-            if condition.test_info['Instrument'] == 'DL11B':
-                future2 = pool.submit(self.measure_T_thread, condition)
-
-            return condition
-
-        elif re.match('set', function, re.I) is not None:  # Set instrument parameter
-            condition = self.set(condition)
-            return condition
-
-        elif re.match('on', function, re.I) is not None:  # Put channel of instrument on
-            condition = self.on(condition)
-            return condition
-
-        elif re.match('off', function, re.I) is not None:  # Put channel of instrument off
-            condition = self.off(condition)
-            return condition
-
-        elif re.match('close', function, re.I) is not None:  # Close instrument
-            condition.test_flag = False
-            condition = self.close(condition)
-            return condition
+        else:  # Function has function name
+            condition = eval('self.' + function_key)\
+                (condition, function_value)  # run single function with function name
+        return condition
 
     def test(self, condition):
         """
@@ -81,28 +54,36 @@ class Test_Custom_Test(Control_Flow):
         Returns:
             condition: Condition information summary
         """
-        step = 0
-        max_step = int(condition.file.iloc[-1]['Step'])
+        step = int(condition.file.iloc[0]['Step'])
+        max_step = int(condition.file.iloc[-1]['Step'])  # Get max step number from test file
 
         while True:
-            condition.test_info = condition.file.iloc[step]
+            condition.start_time = time.time()
+            condition.condition_flag = True
 
-            if condition.test_info['Time'] == condition.test_info['Time']:  # Time sleep according to Time
-                time.sleep(float(condition.test_info['Time']))
+            while condition.condition_flag:
+                condition.test_info = (
+                    condition.file.loc[condition.file['Step'] == step].iloc[-1]
+                ).to_dict()  # Get test info according to target step, then convert into a dict
 
-            condition = self.determine_func(condition)
-            condition = Parse_Custom_Test.get_condition(condition)
+                if condition.test_info['Time'] == condition.test_info['Time']:  # Time sleep according to Time
+                    time.sleep(float(condition.test_info['Time']))
+                condition = self.exec_func(condition)
+                condition = Parse_Custom_Test.parse_condition(condition)
 
-            if condition.test_info['Next'] == condition.test_info['Next']:
-                step = int(condition.test_info['Next'])
+                if condition.condition_flag:  # Judgements not satisfied
+                    condition.reset_test_info()
+                    continue
 
-            else:
-                step = int(condition.test_info['Step']) + 1
+                if condition.test_info['Next'] != condition.test_info['Next']:  # Next is nan
+                    step = int(condition.test_info['Step']) + 1
 
-            if step > max_step:
+                else:  # Next has a target step.
+                    step = int(condition.test_info['Next'])
+                condition.reset_test_info()
+
+            if step > max_step:  # Last step
                 break
-            condition.reset_test_info()
-            time.sleep(1)
 
         condition.test_flag = False
         return condition

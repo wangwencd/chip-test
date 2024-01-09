@@ -156,4 +156,11 @@ AutoTest Version
 
 20231218-modify MAX32670 i2c error
 1.Modify MAX32670 i2c frequency not working error.
-2.Modify average_flag causing output info error in natrium test flow. # chip-test
+2.Modify average_flag causing output info error in natrium test flow. 
+
+20240102-add DP932 instrument
+1.Add DP932 instrument control code and UI.
+2.Modify jupiter test and parse flow, make it more convenient.
+3.Modify E36312A control code error.
+4.Modify DMM7510 control code error.
+5.Modify natrium parse flow, make it more convenient.

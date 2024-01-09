@@ -214,7 +214,7 @@ class Test_Jupiter(Control_Flow):
         time.sleep(1)
         condition = self.on(condition)  # Set instrument on
         time.sleep(1)
-        condition = self.close(condition)
+        # condition = self.close(condition)
         L.info('Init temperature setting finished')
 
         return condition
@@ -242,7 +242,7 @@ class Test_Jupiter(Control_Flow):
         time.sleep(1)
         condition = self.on(condition)  # Set instrument on
         time.sleep(1)
-        condition = self.close(condition)
+        # condition = self.close(condition)
         condition.test_info['Set_Temperature'] = normal_temperature
 
         return condition
@@ -382,24 +382,6 @@ class Test_Jupiter(Control_Flow):
 
         return condition
 
-    def begin_VI_measurement(self, condition):
-        """
-        Begin ADC instrument measurement
-
-        Args:
-            condition: Condition information summary
-
-        Returns:
-            condition: Condition information summary
-        """
-
-        """Begin tem instrument measurement with one thread"""
-        condition.test_info['Instrument'] = condition.test_info['ADC_Instrument']
-        future2 = pool.submit(self.measure_VI_thread, condition)
-        L.info('Begin ADC measurement finished')
-
-        return condition
-
     def temperature_judgement(self, condition):
         """
         Judge whether temperature is stable
@@ -434,84 +416,6 @@ class Test_Jupiter(Control_Flow):
 
         return condition
 
-    def measure_all(self, condition):
-        """
-        Measure voltage, current from instrument and reg data from mcu, then update those into output.
-
-        Args:
-            condition: Condition information summary
-
-        Returns:
-            condition: Condition information summary
-        """
-        retest_time = int(condition.test_info['Retest_Time'])
-        voltage = []
-        data = []
-        bus_num = int(condition.test_info['Reg_Bus_Number'])
-        measurement_period = float(condition.test_info['Measurement_Period'])
-
-        for i in range(retest_time):
-            """Measure register"""
-            time.sleep(measurement_period)
-            while True:
-                condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']
-                condition.measurement_info['Option'] = 'Voltage'
-                condition = self.operate(condition, 'measure_one')
-                # condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-                # condition.measurement_info['Option'] = 'Voltage'
-                # condition.test_info['Channel'] = '1'
-                # condition = self.operate(condition, 'measure_voltage')
-                time.sleep(0.005)
-                condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-                condition.test_info['Msg'] = (self.refresh_I2C(
-                    i2c_address=int(condition.test_info['Reg_Slave'], 16),
-                    data_buf=[int(condition.test_info['Reg_Address'], 16)],
-                    rx_size=2,
-                    bus_num=bus_num
-                )).copy()
-                condition = self.operate(condition, 'I2C_read')
-                if condition.measurement_info['Msg'] is None:
-                    pass
-
-                elif len(condition.measurement_info['Msg'].data_buf) >= 1:
-                    result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
-                    if result >= 32768:
-                        result = result - 65536
-                    data.append(result)
-                    break
-            """Measure voltage and current"""
-            # condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-            # condition.measurement_info['Option'] = 'Voltage'
-            # condition.test_info['Channel'] = '1'
-            # condition = self.operate(condition, 'measure_voltage')
-            # voltage1 = condition.measurement_info['Voltage']
-            # condition.test_info['Channel'] = '2'
-            # condition = self.operate(condition, 'measure_voltage')
-            # voltage2 = condition.measurement_info['Voltage']
-            # voltage.append(abs(voltage1) - abs(voltage2))
-            voltage.append(condition.measurement_info['Voltage'])
-        condition.output_info['Time'] = np.append(
-            condition.output_info['Time'],
-            time.perf_counter()
-        )  # Update time to output
-        try:
-            condition.output_info['Temperature'] = np.append(
-                condition.output_info['Temperature'],
-                condition.measurement_info['Temperature']
-            )  # Update temperature to output
-        except:
-            pass
-        condition.output_info['Voltage'] = np.append(
-            condition.output_info['Voltage'],
-            np.median(voltage)
-        )  # Update voltage to output
-        condition.output_info['Data'] = np.append(
-            condition.output_info['Data'],
-            round(np.median(data))
-        )  # Update data to output
-
-        return condition
-
     def measure_multi(self, condition):
         """
         Measure voltage, current from instrument and reg data from mcu, then update those into output.
@@ -523,6 +427,9 @@ class Test_Jupiter(Control_Flow):
             condition: Condition information summary
         """
         retest_time = int(condition.test_info['Retest_Time'])
+        set_voltage = []
+        current_time = []
+        temperature = []
         voltage = []
         data = [[], [], [], []]
         bus_num = int(condition.test_info['Reg_Bus_Number'])
@@ -531,59 +438,113 @@ class Test_Jupiter(Control_Flow):
 
         for i in range(retest_time):
             time.sleep(measurement_period)
-            condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']
-            condition.measurement_info['Option'] = 'Voltage'
-            condition = self.operate(condition, 'measure_one')
+
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']
+                condition.measurement_info['Option'] = 'Voltage'
+                condition = self.operate(condition, 'measure_one')
             """Measure register"""
-            for j in range(len(i2c_slave)):
-                time.sleep(0.005)
-                while True:
-                    condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-                    condition.test_info['Msg'] = (self.refresh_I2C(
-                        i2c_address=i2c_slave[j],
-                        data_buf=[int(condition.test_info['Reg_Address'], 16)],
-                        rx_size=2,
-                        bus_num=bus_num
-                    )).copy()
-                    condition = self.operate(condition, 'I2C_read')
+            if condition.test_info['Control_Setting_Flag'] is True:
 
-                    if condition.measurement_info['Msg'] is None:
-                        pass
+                for j in range(len(i2c_slave)):
+                    time.sleep(0.005)
 
-                    elif len(condition.measurement_info['Msg'].data_buf) >= 1:
-                        result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
-                        if result >= 32768:
-                            result = result - 65536
-                        data[j].append(result)
-                        break
+                    while True:
+                        condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                        condition.test_info['Msg'] = (self.refresh_I2C(
+                            i2c_address=i2c_slave[j],
+                            data_buf=[int(condition.test_info['Reg_Address'], 16)],
+                            rx_size=4,
+                            bus_num=bus_num
+                        )).copy()
+                        condition = self.operate(condition, 'I2C_read')
+
+                        if condition.measurement_info['Msg'] is None:
+                            condition = self.close(condition)
+                            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                            condition.test_info['Communication'] = condition.test_info['Control_Communication']
+                            condition = self.open(condition)
+                            time.sleep(measurement_period)
+                            continue
+
+                        elif len(condition.measurement_info['Msg'].data_buf) >= 1:
+                            result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+                            if result >= 32768:
+                                result = result - 65536
+                            data[j].append(result)
+                            break
 
             """Measure voltage and current"""
-            # condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-            # condition.measurement_info['Option'] = 'Voltage'
-            # condition = self.operate(condition, 'measure_voltage')
-            # voltage.append(condition.measurement_info['Voltage'])
-            voltage.append(condition.measurement_info['Voltage'])
-        condition.output_info['Time'] = np.append(
-            condition.output_info['Time'],
-            time.perf_counter()
-        )  # Update time to output
-        try:
-            condition.output_info['Temperature'] = np.append(
-                condition.output_info['Temperature'],
-                condition.measurement_info['Temperature']
-            )  # Update temperature to output
-        except:
-            pass
-        condition.output_info['Voltage'] = np.append(
-            condition.output_info['Voltage'],
-            np.median(voltage)
-        )  # Update voltage to output
+            current_time.append(time.perf_counter())
 
-        for j in range(len(i2c_slave)):
-            condition.output_info['Data' + str(j)] = np.append(
-                condition.output_info['Data' + str(j)],
-                round(np.median(data[j]))
-            )  # Update data to output
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                set_voltage.append(condition.measurement_info['Set_Voltage'])
+
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                voltage.append(condition.measurement_info['Voltage'])
+
+            if condition.test_info['Temperature_Setting_Flag'] is True:
+                temperature.append(condition.measurement_info['Temperature'])
+
+        if condition.test_info['Data_Average_Flag'] is True:
+            condition.output_info['Time'] = np.append(
+                condition.output_info['Time'],
+                np.median(current_time)
+            )  # Update time to output
+        else:
+            condition.output_info['Time'] = np.append(
+                condition.output_info['Time'],
+                current_time
+            )
+
+        if condition.test_info['Temperature_Setting_Flag'] is True:
+            if condition.test_info['Data_Average_Flag'] is True:
+                condition.output_info['Temperature'] = np.append(
+                    condition.output_info['Temperature'],
+                    np.median(temperature)
+                )  # Update temperature to output
+            else:
+                condition.output_info['Temperature'] = np.append(
+                    condition.output_info['Temperature'],
+                    temperature
+                )  # Update temperature to output
+
+        if condition.test_info['ADC_Measurement_Flag'] is True:
+            if condition.test_info['Data_Average_Flag'] is True:
+                condition.output_info['Voltage'] = np.append(
+                    condition.output_info['Voltage'],
+                    np.median(voltage)
+                )  # Update voltage to output
+            else:
+                condition.output_info['Voltage'] = np.append(
+                    condition.output_info['Voltage'],
+                    voltage
+                )
+
+        if condition.test_info['ADC_Setting_Flag'] is True:
+            if condition.test_info['Data_Average_Flag'] is True:
+                condition.output_info['Set_Voltage'] = np.append(
+                    condition.output_info['Set_Voltage'],
+                    np.median(set_voltage)
+                )  # Update voltage to output
+            else:
+                condition.output_info['Set_Voltage'] = np.append(
+                    condition.output_info['Set_Voltage'],
+                    set_voltage
+                )
+
+        if condition.test_info['Control_Setting_Flag'] is True:
+                for j in range(len(i2c_slave)):
+                    if condition.test_info['Data_Average_Flag'] is True:
+                        condition.output_info['Data'] = np.append(
+                            condition.output_info['Data'],
+                            round(np.median(data[j]))
+                        )  # Update data to output
+                    else:
+                        condition.output_info['Data'] = np.append(
+                            condition.output_info['Data'],
+                            data[j]
+                        )  # Update data to output
 
         return condition
 
@@ -597,62 +558,69 @@ class Test_Jupiter(Control_Flow):
         Returns:
             condition: Condition information summary
         """
-        temperature_setting = bool(int(condition.test_info['Temperature_Setting']))
 
         try:
             """Temperature setting"""
-            if temperature_setting is True:  # Setting temperature
+            if condition.test_info['Temperature_Setting_Flag'] is True:  # Setting temperature
                 condition = self.init_temperature_setting(condition)
                 condition = self.begin_T_measurement(condition)
                 time.sleep(1)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:  # Not setting
-                pass
 
             """Init instruments"""
-            condition = self.init_power_setting(condition)
-            condition = self.set_power(condition)  # Power setting
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition = self.init_power_setting(condition)
+                condition = self.set_power(condition)  # Power setting
             time.sleep(1)
-            condition = self.init_control_setting(condition)
-            condition = self.init_adc_setting(condition)
-            condition = self.init_adc_measurement(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.init_control_setting(condition)
+
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition = self.init_adc_setting(condition)
+
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                condition = self.init_adc_measurement(condition)
 
             """Preparation"""
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
-            condition.test_info['Voltage'] = condition.test_info['Start_Voltage']
-            condition.test_info['Current'] = condition.test_info['Start_Current']
-            condition.test_info['Channel'] = '1'
-            condition = self.set(condition)
-            condition = self.on(condition)
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
+                condition.test_info['Voltage'] = condition.test_info['Start_Voltage']
+                condition.test_info['Current'] = condition.test_info['Start_Current']
+                condition.test_info['Channel'] = '1'
+                condition = self.set(condition)
+                condition = self.on(condition)
 
-            condition.test_info['Voltage'] = condition.test_info['End_Voltage']
-            condition.test_info['Current'] = condition.test_info['Start_Current']
-            condition.test_info['Channel'] = '2'
-            condition = self.set(condition)
-            condition = self.on(condition)
+                condition.test_info['Voltage'] = condition.test_info['End_Voltage']
+                condition.test_info['Current'] = condition.test_info['Start_Current']
+                condition.test_info['Channel'] = '2'
+                condition = self.set(condition)
+                condition = self.on(condition)
 
-            condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']  # ADC measurement
-            condition.test_info['Option'] = 'Voltage'
-            condition.test_info['Flag'] = 'ON'
-            condition.test_info['Type'] = 'REP'
-            condition.test_info['Count'] = '1'
-            condition.test_info['Choice'] = 'AUTO'
-            condition = self.operate(condition, 'set_one_autorange')
-            condition = self.operate(condition, 'set_one_autozero')
-            condition = self.operate(condition, 'set_one_average_control')
-            condition = self.operate(condition, 'set_one_average_count')
-            condition = self.operate(condition, 'set_one_average')
-            condition = self.operate(condition, 'set_one_impedance')
-            #
-            condition = self.set_preparation(condition)  # MCU
-            # time.sleep(1)
-            condition.test_info['Instrument'] = condition.test_info['Power_Instrument']  # Power
-            condition.test_info['Voltage'] = condition.test_info['Power_Voltage_3']
-            condition.test_info['Current'] = condition.test_info['Power_Current_3']
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
-            condition = self.set(condition)
-            condition = self.on(condition)
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']  # ADC measurement
+                condition.test_info['Option'] = 'Voltage'
+                condition.test_info['Flag'] = 'ON'
+                condition.test_info['Type'] = 'REP'
+                condition.test_info['Count'] = '1'
+                condition.test_info['Choice'] = 'AUTO'
+                condition = self.operate(condition, 'set_one_autorange')
+                condition = self.operate(condition, 'set_one_autozero')
+                condition = self.operate(condition, 'set_one_average_control')
+                condition = self.operate(condition, 'set_one_average_count')
+                condition = self.operate(condition, 'set_one_average')
+                condition = self.operate(condition, 'set_one_impedance')
+
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.set_preparation(condition)  # MCU
+            time.sleep(1)
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Power_Instrument']  # Power
+                condition.test_info['Voltage'] = condition.test_info['Power_Voltage_3']
+                condition.test_info['Current'] = condition.test_info['Power_Current_3']
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
+                condition = self.set(condition)
+                condition = self.on(condition)
             time.sleep(1)
 
             """Set"""
@@ -664,45 +632,45 @@ class Test_Jupiter(Control_Flow):
             set_voltage_2 = end_voltage
 
             while start_voltage < end_voltage:
-                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-                condition.test_info['Voltage'] = set_voltage_1
-                condition.test_info['Channel'] = '1'
-                condition = self.operate(condition, 'set_voltage')
-                condition.test_info['Voltage'] = set_voltage_2
-                condition.test_info['Channel'] = '2'
-                condition = self.operate(condition, 'set_voltage')
-                condition.output_info['Current'] = np.append(
-                    condition.output_info['Current'],
-                    set_voltage_1
-                )  # Update time to output
-                condition = self.measure_all(condition)
+                if condition.test_info['ADC_Setting_Flag'] is True:
+                    condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                    condition.test_info['Voltage'] = set_voltage_1
+                    condition.test_info['Channel'] = '1'
+                    condition = self.operate(condition, 'set_voltage')
+                    condition.test_info['Voltage'] = set_voltage_2
+                    condition.test_info['Channel'] = '2'
+                    condition = self.operate(condition, 'set_voltage')
+
+                condition.measurement_info['Set_Voltage'] = set_voltage_1
+                condition = self.measure_multi(condition)
                 set_voltage_1 = round(set_voltage_1 + step_voltage, 6)
                 set_voltage_2 = round(set_voltage_2 - step_voltage, 6)
                 start_voltage = round(start_voltage + step_voltage, 6)
 
             """Close ADC instrument"""
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-            condition.test_info['Channel'] = '1'
-            condition = self.off(condition)
-            condition.test_info['Channel'] = '2'
-            condition = self.off(condition)
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                condition.test_info['Channel'] = '1'
+                condition = self.off(condition)
+                condition.test_info['Channel'] = '2'
+                condition = self.off(condition)
             """Close power instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_1']
-            condition = self.off(condition)
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_2']
-            condition = self.off(condition)
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
-            condition = self.off(condition)
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_1']
+                condition = self.off(condition)
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_2']
+                condition = self.off(condition)
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
+                condition = self.off(condition)
             """Close temperature setting instrument"""
-            if temperature_setting is True:
+            if condition.test_info['Temperature_Setting_Flag'] is True:
                 condition = self.stop_temperature_setting(condition)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:
-                pass
             """Close controlling instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-            condition = self.close(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                condition = self.close(condition)
             L.info('Finish normal flow')
         except:
             L.error(traceback.format_exc())
@@ -724,64 +692,68 @@ class Test_Jupiter(Control_Flow):
         Returns:
             condition: Condition information summary
         """
-        temperature_setting = bool(int(condition.test_info['Temperature_Setting']))
-
         try:
             """Temperature setting"""
-            if temperature_setting is True:  # Setting temperature
+            if condition.test_info['Temperature_Setting_Flag'] is True:  # Setting temperature
                 condition = self.init_temperature_setting(condition)
                 condition = self.begin_T_measurement(condition)
                 time.sleep(1)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:  # Not setting
-                pass
 
             """Init instruments"""
-            condition = self.init_power_setting(condition)
-            condition = self.set_power(condition)  # Power setting
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition = self.init_power_setting(condition)
+                condition = self.set_power(condition)  # Power setting
             time.sleep(1)
-            condition = self.init_control_setting(condition)
-            condition = self.init_adc_setting(condition)
-            condition = self.init_adc_measurement(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.init_control_setting(condition)
+
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition = self.init_adc_setting(condition)
+
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                condition = self.init_adc_measurement(condition)
 
             """Preparation"""
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
-            condition.test_info['Voltage'] = condition.test_info['Start_Voltage']
-            condition.test_info['Current'] = condition.test_info['Start_Current']
-            condition.test_info['Channel'] = '1'
-            condition = self.set(condition)
-            condition = self.on(condition)
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
+                condition.test_info['Voltage'] = condition.test_info['Start_Voltage']
+                condition.test_info['Current'] = condition.test_info['Start_Current']
+                condition.test_info['Channel'] = '1'
+                condition = self.set(condition)
+                condition = self.on(condition)
 
-            condition.test_info['Voltage'] = condition.test_info['End_Voltage']
-            condition.test_info['Current'] = condition.test_info['Start_Current']
-            condition.test_info['Channel'] = '2'
-            condition = self.set(condition)
-            condition = self.on(condition)
+                condition.test_info['Voltage'] = condition.test_info['End_Voltage']
+                condition.test_info['Current'] = condition.test_info['Start_Current']
+                condition.test_info['Channel'] = '2'
+                condition = self.set(condition)
+                condition = self.on(condition)
 
-            condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']  # ADC measurement
-            condition.test_info['Option'] = 'Voltage'
-            condition.test_info['Flag'] = 'ON'
-            condition.test_info['Type'] = 'REP'
-            condition.test_info['Count'] = '2'
-            condition.test_info['Choice'] = 'AUTO'
-            condition = self.operate(condition, 'set_one_autorange')
-            condition = self.operate(condition, 'set_one_autozero')
-            condition = self.operate(condition, 'set_one_average_control')
-            condition = self.operate(condition, 'set_one_average_count')
-            condition = self.operate(condition, 'set_one_average')
-            condition = self.operate(condition, 'set_one_impedance')
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']  # ADC measurement
+                condition.test_info['Option'] = 'Voltage'
+                condition.test_info['Flag'] = 'ON'
+                condition.test_info['Type'] = 'REP'
+                condition.test_info['Count'] = '1'
+                condition.test_info['Choice'] = 'AUTO'
+                condition = self.operate(condition, 'set_one_autorange')
+                condition = self.operate(condition, 'set_one_autozero')
+                condition = self.operate(condition, 'set_one_average_control')
+                condition = self.operate(condition, 'set_one_average_count')
+                condition = self.operate(condition, 'set_one_average')
+                condition = self.operate(condition, 'set_one_impedance')
 
-
-            condition = self.set_preparation(condition)  # MCU
-
-            condition.test_info['Instrument'] = condition.test_info['Power_Instrument']  # Power
-            condition.test_info['Voltage'] = condition.test_info['Power_Voltage_3']
-            condition.test_info['Current'] = condition.test_info['Power_Current_3']
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
-            condition = self.set(condition)
-            condition = self.on(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.set_preparation(condition)  # MCU
             time.sleep(1)
-
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Power_Instrument']  # Power
+                condition.test_info['Voltage'] = condition.test_info['Power_Voltage_3']
+                condition.test_info['Current'] = condition.test_info['Power_Current_3']
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
+                condition = self.set(condition)
+                condition = self.on(condition)
             time.sleep(1)
 
             """Set"""
@@ -792,46 +764,46 @@ class Test_Jupiter(Control_Flow):
             set_voltage_1 = start_voltage
             set_voltage_2 = end_voltage
 
-            while start_voltage <= end_voltage:
-                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-                condition.test_info['Voltage'] = set_voltage_1
-                condition.test_info['Channel'] = '1'
-                condition = self.operate(condition, 'set_voltage')
-                condition.test_info['Voltage'] = set_voltage_2
-                condition.test_info['Channel'] = '2'
-                condition = self.operate(condition, 'set_voltage')
-                condition.output_info['Current'] = np.append(
-                    condition.output_info['Current'],
-                    set_voltage_1
-                )  # Update time to output
+            while start_voltage < end_voltage:
+                if condition.test_info['ADC_Setting_Flag'] is True:
+                    condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                    condition.test_info['Voltage'] = set_voltage_1
+                    condition.test_info['Channel'] = '1'
+                    condition = self.operate(condition, 'set_voltage')
+                    condition.test_info['Voltage'] = set_voltage_2
+                    condition.test_info['Channel'] = '2'
+                    condition = self.operate(condition, 'set_voltage')
+
+                condition.measurement_info['Set_Voltage'] = set_voltage_1
                 condition = self.measure_multi(condition)
                 set_voltage_1 = round(set_voltage_1 + step_voltage, 6)
                 set_voltage_2 = round(set_voltage_2 - step_voltage, 6)
                 start_voltage = round(start_voltage + step_voltage, 6)
 
             """Close ADC instrument"""
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-            condition.test_info['Channel'] = '1'
-            condition = self.off(condition)
-            condition.test_info['Channel'] = '2'
-            condition = self.off(condition)
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                condition.test_info['Channel'] = '1'
+                condition = self.off(condition)
+                condition.test_info['Channel'] = '2'
+                condition = self.off(condition)
             """Close power instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_1']
-            condition = self.off(condition)
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_2']
-            condition = self.off(condition)
-            condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
-            condition = self.off(condition)
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_1']
+                condition = self.off(condition)
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_2']
+                condition = self.off(condition)
+                condition.test_info['Channel'] = condition.test_info['Power_Channel_3']
+                condition = self.off(condition)
             """Close temperature setting instrument"""
-            if temperature_setting is True:
+            if condition.test_info['Temperature_Setting_Flag'] is True:
                 condition = self.stop_temperature_setting(condition)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:
-                pass
             """Close controlling instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-            condition = self.close(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                condition = self.close(condition)
             L.info('Finish normal flow')
         except:
             L.error(traceback.format_exc())
@@ -853,30 +825,34 @@ class Test_Jupiter(Control_Flow):
         Returns:
             condition: Condition information summary
         """
-        temperature_setting = bool(int(condition.test_info['Temperature_Setting']))
 
         try:
             """Temperature setting"""
-            if temperature_setting is True:  # Setting temperature
+            if condition.test_info['Temperature_Setting_Flag'] is True:  # Setting temperature
                 condition = self.init_temperature_setting(condition)
                 condition = self.begin_T_measurement(condition)
                 time.sleep(1)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:  # Not setting
-                pass
 
             """Init instruments"""
-            condition = self.init_power_setting(condition)
-            condition = self.init_adc_setting(condition)
-            condition = self.init_control_setting(condition)
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition = self.init_power_setting(condition)
+                condition = self.set_power(condition)
+
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition = self.init_adc_setting(condition)
+
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.init_control_setting(condition)
 
             """Preparation"""
-            condition = self.set_power(condition)
-            condition = self.set_preparation(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.set_preparation(condition)
 
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-            condition = self.operate(condition, 'set_channel_sin')
-            condition = self.on(condition)
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                condition = self.operate(condition, 'set_channel_sin')
+                condition = self.on(condition)
             time.sleep(1)
 
             retest_time = int(condition.test_info['Retest_Time'])  # Get retest time
@@ -888,81 +864,81 @@ class Test_Jupiter(Control_Flow):
                 condition.test_info['Period'] = float(condition.test_info['Measurement_Period']) * 1000
 
             """Measure register"""
-            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-            bus_num = int(condition.test_info['Reg_Bus_Number'])
-            condition.test_info['Msg'] = (
-                condition.test_info['Period'],
-                (self.refresh_I2C(
-                    i2c_address=int(condition.test_info['Reg_Slave'], 16),
-                    data_buf=[int(condition.test_info['Reg_Address'], 16)],
-                    rx_size=2,
-                    bus_num=bus_num
-            )).copy())
-            condition = self.operate(condition, 'GO_write')  # Send cyclic sampling command
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                bus_num = int(condition.test_info['Reg_Bus_Number'])
+                condition.test_info['Msg'] = (
+                    condition.test_info['Period'],
+                    (self.refresh_I2C(
+                        i2c_address=int(condition.test_info['Reg_Slave'], 16),
+                        data_buf=[int(condition.test_info['Reg_Address'], 16)],
+                        rx_size=2,
+                        bus_num=bus_num
+                )).copy())
+                condition = self.operate(condition, 'GO_write')  # Send cyclic sampling command
 
-            for i in range(retest_time):
+                for i in range(retest_time):
 
-                condition = self.operate(condition, 'I2C_read_standby')  # Read I2C once
+                    condition = self.operate(condition, 'I2C_read_standby')  # Read I2C once
 
-                if condition.measurement_info['Msg'] is None:  # If master do not receive data
-                    condition = self.close(condition)
-                    condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-                    condition.test_info['Communication'] = condition.test_info['Control_Communication']
-                    condition = self.open(condition)
+                    if condition.measurement_info['Msg'] is None:  # If master do not receive data
+                        condition = self.close(condition)
+                        condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                        condition.test_info['Communication'] = condition.test_info['Control_Communication']
+                        condition = self.open(condition)
+                        condition = self.operate(condition, 'Reset')
+                        L.error("Could not receive data")
+                        break
+
+                    elif len(condition.measurement_info['Msg'].data_buf) >= 1:  # If master receive right datas
+                        result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+
+                    else:  # If master receive wrong data
+                        L.error("Could not receive data")
+                        break
+
+                    condition.output_info['Time'] = np.append(
+                        condition.output_info['Time'],
+                        time.perf_counter()
+                    )  # Update time to output
+                    condition.output_info['Data'] = np.append(
+                        condition.output_info['Data'],
+                        result
+                    )  # Update data to output
+
+                condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                for i in range(5):  # Reset MCU
                     condition = self.operate(condition, 'Reset')
-                    L.error("Could not receive data")
-                    break
-
-                elif len(condition.measurement_info['Msg'].data_buf) >= 1:  # If master receive right datas
-                    result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
-
-                else:  # If master receive wrong data
-                    L.error("Could not receive data")
-                    break
-
-                condition.output_info['Time'] = np.append(
-                    condition.output_info['Time'],
-                    time.perf_counter()
-                )  # Update time to output
-                condition.output_info['Data'] = np.append(
-                    condition.output_info['Data'],
-                    result
-                )  # Update data to output
-
-            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-            for i in range(5):  # Reset MCU
-                condition = self.operate(condition, 'Reset')
-                time.sleep(1)
+                    time.sleep(1)
 
             condition.test_VI_flag = False  # Stop charge measurement
             time.sleep(1)
             """Close ADC instrument"""
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-            condition = self.off(condition)
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                condition = self.off(condition)
             """Close power instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
-            condition = self.off(condition)
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
+                condition = self.off(condition)
             """Close temperature setting instrument"""
-            if temperature_setting is True:
+            if condition.test_info['Temperature_Setting_Flag'] is True:
                 condition = self.stop_temperature_setting(condition)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:
-                pass
             """Close temperature measurement instrument"""
             condition.test_T_flag = False  # Stop charge measurement
             time.sleep(1)
-            if temperature_setting is True:
+            if condition.test_info['Temperature_Setting_Flag'] is True:
                 condition.test_info['Instrument'] = condition.test_info['Temperature_Setting_Instrument']
                 condition.test_info['Communication'] = condition.test_info['Temperature_Setting_Communication']
                 condition = self.open(condition)
                 condition = self.off(condition)
                 condition = self.close(condition)
                 time.sleep(1)
-            elif temperature_setting is False:
-                pass
             """Close controlling instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-            condition = self.close(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                condition = self.close(condition)
             L.info('Finish normal flow')
 
         except:
@@ -970,38 +946,37 @@ class Test_Jupiter(Control_Flow):
             """Close ADC instrument"""
             condition.test_VI_flag = False  # Stop measurement
             time.sleep(1)
-            condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
-            condition.test_info['Communication'] = condition.test_info['ADC_Setting_Communication']
-            condition = self.open(condition)
-            condition = self.off(condition)
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                condition.test_info['Communication'] = condition.test_info['ADC_Setting_Communication']
+                condition = self.open(condition)
+                condition = self.off(condition)
             """Close power instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
-            condition.test_info['Communication'] = condition.test_info['Power_Communication']
-            condition = self.open(condition)
-            condition = self.off(condition)
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
+                condition.test_info['Communication'] = condition.test_info['Power_Communication']
+                condition = self.open(condition)
+                condition = self.off(condition)
             """Close temperature setting instrument"""
-            if temperature_setting is True:
+            if condition.test_info['Temperature_Setting_Flag'] is True:
                 condition = self.stop_temperature_setting(condition)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:
-                pass
             """Close temperature measurement instrument"""
             condition.test_T_flag = False  # Stop charge measurement
             time.sleep(1)
-            if temperature_setting is True:
+            if condition.test_info['Temperature_Setting_Flag'] is True:
                 condition.test_info['Instrument'] = condition.test_info['Temperature_Setting_Instrument']
                 condition.test_info['Communication'] = condition.test_info['Temperature_Setting_Communication']
                 condition = self.open(condition)
                 condition = self.off(condition)
                 condition = self.close(condition)
                 time.sleep(1)
-            elif temperature_setting is False:
-                pass
             """Close controlling instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-            condition.test_info['Communication'] = condition.test_info['Control_Communication']
-            condition = self.open(condition)
-            condition = self.close(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
+                condition.test_info['Communication'] = condition.test_info['Control_Communication']
+                condition = self.open(condition)
+                condition = self.close(condition)
             L.info('Finish except flow')
 
         finally:
@@ -1013,7 +988,7 @@ class Test_Jupiter(Control_Flow):
 
     def test_noise(self, condition):
         """
-        Test Jupiter DNL of 4 ADC
+        Test Natrium INL of ADC
 
         Args:
             condition: Condition information summary
@@ -1021,92 +996,85 @@ class Test_Jupiter(Control_Flow):
         Returns:
             condition: Condition information summary
         """
-        temperature_setting = bool(int(condition.test_info['Temperature_Setting']))
 
         try:
             """Temperature setting"""
-            if temperature_setting is True:  # Setting temperature
+            if condition.test_info['Temperature_Setting_Flag'] is True:  # Setting temperature
                 condition = self.init_temperature_setting(condition)
                 condition = self.begin_T_measurement(condition)
                 time.sleep(1)
                 condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:  # Not setting
-                pass
 
             """Init instruments"""
-            condition = self.init_power_setting(condition)
-            condition = self.set_power(condition)  # Power setting
+            if condition.test_info['Power_Setting_Flag'] is True:
+                condition = self.init_power_setting(condition)
+                condition = self.set_power(condition)  # Power setting
             time.sleep(1)
-            condition = self.init_control_setting(condition)
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.init_control_setting(condition)
+
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition = self.init_adc_setting(condition)
+
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                condition = self.init_adc_measurement(condition)
 
             """Preparation"""
-            condition = self.set_preparation(condition)  # MCU
+            if condition.test_info['ADC_Setting_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']  # ADC setting
+                condition.test_info['Voltage'] = condition.test_info['Start_Voltage']
+                condition.test_info['Current'] = condition.test_info['Start_Current']
+                condition.test_info['Channel'] = '1'
+                condition = self.set(condition)
+                condition = self.on(condition)
+
+                condition.test_info['Voltage'] = condition.test_info['End_Voltage']
+                condition.test_info['Current'] = condition.test_info['Start_Current']
+                condition.test_info['Channel'] = '2'
+                condition = self.set(condition)
+                condition = self.on(condition)
+
+            if condition.test_info['ADC_Measurement_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['ADC_Measurement_Instrument']  # ADC measurement
+                condition.test_info['Option'] = 'Voltage'
+                condition.test_info['Flag'] = 'ON'
+                condition.test_info['Type'] = 'REP'
+                condition.test_info['Count'] = '2'
+                condition.test_info['Choice'] = 'AUTO'
+                condition = self.operate(condition, 'set_one_autorange')
+                condition = self.operate(condition, 'set_one_autozero')
+                condition = self.operate(condition, 'set_one_average_control')
+                condition = self.operate(condition, 'set_one_average_count')
+                condition = self.operate(condition, 'set_one_average')
+                condition = self.operate(condition, 'set_one_impedance')
+
+            if condition.test_info['Control_Setting_Flag'] is True:
+                condition = self.set_preparation(condition)  # MCU
             time.sleep(1)
 
             """Set"""
-            retest_time = int(condition.test_info['Retest_Time'])
-            voltage = []
-            data = [[], [], [], []]
-            bus_num = int(condition.test_info['Reg_Bus_Number'])
-            i2c_slave = eval(condition.test_info['Reg_Slave'])
+            start_voltage = float(condition.test_info['Start_Voltage'])
+            end_voltage = float(condition.test_info['End_Voltage'])
+            step_voltage = float(condition.test_info['Step_Voltage'])
             measurement_period = float(condition.test_info['Measurement_Period'])
+            set_voltage_1 = start_voltage
+            set_voltage_2 = end_voltage
 
-            for i in range(retest_time):
-                data = [[], [], [], []]
-                time.sleep(measurement_period)
-                """Measure register"""
-                for j in range(len(i2c_slave)):
-                    time.sleep(0.005)
-                    while True:
-                        condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-                        condition.test_info['Msg'] = (self.refresh_I2C(
-                            i2c_address=i2c_slave[j],
-                            data_buf=[int(condition.test_info['Reg_Address'], 16)],
-                            rx_size=2,
-                            bus_num=bus_num
-                        )).copy()
-                        condition = self.operate(condition, 'I2C_read')
+            while start_voltage <= end_voltage:
 
-                        if condition.measurement_info['Msg'] is None:
-                            pass
-
-                        elif len(condition.measurement_info['Msg'].data_buf) >= 1:
-                            result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
-                            data[j].append(result)
-                            break
-
-                    """Measure voltage and current"""
-                condition.output_info['Time'] = np.append(
-                    condition.output_info['Time'],
-                    time.perf_counter()
-                )  # Update time to output
-                try:
-                    condition.output_info['Temperature'] = np.append(
-                        condition.output_info['Temperature'],
-                        condition.measurement_info['Temperature']
-                    )  # Update temperature to output
-                except:
-                    pass
-                for j in range(len(i2c_slave)):
-                    condition.output_info['Data' + str(j)] = np.append(
-                        condition.output_info['Data' + str(j)],
-                        data[j]
-                    )  # Update data to output
-            # """Close power instrument"""
-            # condition.test_info['Instrument'] = condition.test_info['Power_Instrument']
-            # condition.test_info['Channel'] = condition.test_info['Power_Channel_1']
-            # condition = self.off(condition)
-            # condition.test_info['Channel'] = condition.test_info['Power_Channel_2']
-            # condition = self.off(condition)
-            """Close temperature setting instrument"""
-            if temperature_setting is True:
-                condition = self.stop_temperature_setting(condition)
-                condition = self.temperature_judgement(condition)
-            elif temperature_setting is False:
-                pass
-            """Close controlling instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Control_Instrument']
-            condition = self.close(condition)
+                if condition.test_info['ADC_Setting_Flag'] is True:
+                    condition.test_info['Instrument'] = condition.test_info['ADC_Setting_Instrument']
+                    condition.test_info['Voltage'] = set_voltage_1
+                    condition.test_info['Channel'] = '1'
+                    condition = self.operate(condition, 'set_voltage')
+                    condition.test_info['Voltage'] = set_voltage_2
+                    condition.test_info['Channel'] = '2'
+                    condition = self.operate(condition, 'set_voltage')
+                condition.measurement_info['Set_Voltage'] = set_voltage_1
+                condition = self.measure_multi(condition)
+                set_voltage_1 = round(set_voltage_1 + step_voltage, 6)
+                set_voltage_2 = round(set_voltage_2 - step_voltage, 6)
+                start_voltage = round(start_voltage + step_voltage, 6)
             L.info('Finish normal flow')
         except:
             L.error(traceback.format_exc())

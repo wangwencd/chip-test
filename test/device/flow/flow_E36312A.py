@@ -43,7 +43,7 @@ class Flow_E36312A(E36312A):
         Returns:
             condition: Condition information summary
         """
-        channel = condition.test_info['Channel']
+        channel = str(condition.test_info['Channel'])
         voltage = condition.test_info['Voltage']
         current = condition.test_info['Current']
 
@@ -71,7 +71,7 @@ class Flow_E36312A(E36312A):
         Returns:
             condition: Condition information summary
         """
-        channel = condition.measurement_info['Channel']
+        channel = str(condition.measurement_info['Channel'])
 
         if channel == '1' or channel == '2' or channel == '3':
             voltage, current = self.query_channel_all(channel)
@@ -94,7 +94,7 @@ class Flow_E36312A(E36312A):
         Returns:
             condition: Condition information summary
         """
-        channel = condition.test_info['Channel']
+        channel = str(condition.test_info['Channel'])
 
         if channel == '1' or channel == '2' or channel == '3':
             self.channel_on(channel=channel)
@@ -114,7 +114,7 @@ class Flow_E36312A(E36312A):
         Returns:
             condition: Condition information summary
         """
-        channel = condition.test_info['Channel']
+        channel = str(condition.test_info['Channel'])
 
         if channel == '1' or channel == '2' or channel == '3':
             self.channel_off(channel=channel)
@@ -148,7 +148,7 @@ class Flow_E36312A(E36312A):
         Returns:
             condition: Condition information summary
         """
-        channel = condition.test_info['Channel']
+        channel = str(condition.test_info['Channel'])
         voltage = condition.test_info['Voltage']
 
         if channel == '1' or channel == '2' or channel == '3':
@@ -175,7 +175,7 @@ class Flow_E36312A(E36312A):
         Returns:
             condition: Condition information summary
         """
-        channel = condition.test_info['Channel']
+        channel = str(condition.test_info['Channel'])
         current = condition.test_info['Current']
 
         if channel == '1' or channel == '2' or channel == '3':
