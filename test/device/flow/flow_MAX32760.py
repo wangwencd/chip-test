@@ -173,3 +173,34 @@ class Flow_MAX32670(MAX32670):
         condition.measurement_info['Msg'] = proto_info
 
         return condition
+
+    def SPI_write(self, condition):
+        """
+        Write message from SPI
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        msg = condition.test_info['Msg']
+        proto_info = self.write_SPI(msg)
+
+        return condition
+
+    def SPI_read(self, condition):
+        """
+        Read message from SPI
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        msg = condition.test_info['Msg']
+        proto_info = self.read_SPI(msg)
+        condition.measurement_info['Msg'] = proto_info
+
+        return condition

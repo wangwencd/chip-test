@@ -66,6 +66,28 @@ class MAX32670(object):
             elif func_flag == 5:  # Reset function
                 L.info(self.name + ' reset')
 
+            elif func_flag == 6:  # SPI write function
+                if msg['cfg'] == 1:  # Write config
+                    L.info(
+                        self.name
+                        + ' set'
+                        + ' CPOL: ' + str(msg['cpol'])
+                        + ', CPHA: ' + str(msg['cpha'])
+                        + ', First bit: ' + str(msg['fstb'])
+                        + ', Size: ' + str(msg['size'])
+                        + ', CSPOL: ' + str(msg['cspol'])
+                        + ', Frequency: ' + str(msg['freq'])
+                    )
+                else:
+                    parse_result = Reg_Operation.dec_to_hex(msg['data_buf'])
+                    L.info(
+                        self.name + ' write address: [' + str(parse_result[0]) + '], value: ' + str(parse_result[1:])
+                    )
+
+            elif func_flag == 7:  # SPI read function
+                parse_result = Reg_Operation.dec_to_hex(msg.data_buf)
+                L.info(self.name + ' read value: ' + str(parse_result))
+
     def write_I2C(self, msg):
         proto_info = self.com_transimit_write(
             proto_type='I2C_Proto',
@@ -166,5 +188,19 @@ class MAX32670(object):
 
     def com_transimit_write(self, **kwargs):
         proto_info = self.pack_and_send_mesg(**kwargs)
+
+        return proto_info
+
+    def write_SPI(self, msg):
+        msg.update({'proto_type': 'SPI_Proto'})
+        proto_info = self.com_transimit_write(**msg)
+        self.parse_result(msg, 6)
+
+        return proto_info
+
+    def read_SPI(self, msg):
+        msg.update({'proto_type': 'SPI_Proto'})
+        proto_info = self.com_transimit_read(**msg)
+        self.parse_result(proto_info, 7)
 
         return proto_info

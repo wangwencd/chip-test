@@ -5,10 +5,12 @@ Version: 3.8
 Date: 2022/9/5 13:55
 File: parse_custom_test.py
 """
-
+import copy
 import re
 import time
 import logging
+import pandas as pd
+import numpy as np
 
 from parse.file.file_operation import File_Operation
 
@@ -29,16 +31,17 @@ class Parse_Custom_Test:
         """
         file = File_Operation.find_file(condition.config_path, 'xlsx')
         condition.file = File_Operation.get_dataframe_from_first(file)
+        condition = Parse_Custom_Test.parse_file(condition)
         condition.test_VI_flag = True
         condition.test_T_flag = True
         condition.measurement_flag = True
 
         return condition
 
-    @classmethod
-    def get_condition(cls, condition):
+    @staticmethod
+    def parse_condition(condition):
         """
-        Get condition of judgement and run judgement according to content in Condition.
+        Parse condition of judgement and run judgement according to content in Condition.
         Judgement items are included: Voltage, Current, Temperature, Time.
         Judgement methods are included: <, >, <=, >=, ==, !=.
         Condition methods between judgements are included： and, or.
@@ -63,7 +66,7 @@ class Parse_Custom_Test:
         string = str(condition.test_info['Condition'])
         """Get judgement num"""
         element_num = len(re.findall('<|>|<=|>=|==|!=', string))
-        L.info('Judgement num is ' + str(element_num))
+        # L.info('Judgement num is ' + str(element_num))
         """Get condition methods between judgements"""
         for index, value in enumerate(re.findall(',|;', string)):
             condition.test_info['condition_method' + '_' + str(index)] = value
@@ -86,122 +89,131 @@ class Parse_Custom_Test:
             #     pos_right.append(index) if value == '(' else pos_right
 
         if element_num == 0:  # Num is 0
-            pass
+            condition.condition_flag = False
 
         elif element_num == 1:  # Num is 1
-            cls.t1 = time.time()
+            result = Parse_Custom_Test.judge_one(
+                condition,
+                condition.test_info['judgement_item_0'],
+                condition.test_info['judgement_method_0'],
+                condition.test_info['judgement_value_0']
+            )  # Get result of 1st judgement
 
-            while True:
-                result = cls.judge_one(
-                    condition,
-                    condition.test_info['judgement_item_0'],
-                    condition.test_info['judgement_method_0'],
-                    condition.test_info['judgement_value_0']
-                )  # Get result of 1st judgement
-
-                if result:  # Judgements satisfied
-                    break
-                time.sleep(1)
+            if result:  # Judgements satisfied
+                condition.condition_flag = False
+            else:  # Judgements not satisfied
+                condition.condition_flag = True
 
         elif element_num == 2:  # Num is 2
-            cls.t1 = time.time()
 
-            while True:
-                result0 = cls.judge_one(
-                    condition,
-                    condition.test_info['judgement_item_0'],
-                    condition.test_info['judgement_method_0'],
-                    condition.test_info['judgement_value_0']
-                )  # Get result of 1st judgement
-                result1 = cls.judge_one(
-                    condition,
-                    condition.test_info['judgement_item_1'],
-                    condition.test_info['judgement_method_1'],
-                    condition.test_info['judgement_value_1']
-                )  # Get result of 2nd judgement
+            result0 = Parse_Custom_Test.judge_one(
+                condition,
+                condition.test_info['judgement_item_0'],
+                condition.test_info['judgement_method_0'],
+                condition.test_info['judgement_value_0']
+            )  # Get result of 1st judgement
+            result1 = Parse_Custom_Test.judge_one(
+                condition,
+                condition.test_info['judgement_item_1'],
+                condition.test_info['judgement_method_1'],
+                condition.test_info['judgement_value_1']
+            )  # Get result of 2nd judgement
 
-                if condition.test_info['condition_method_0'] == ',':  # Format is: If a and b
+            if condition.test_info['condition_method_0'] == ',':  # Format is: If a and b
 
-                    if result0 and result1:  # Judgements satisfied
-                        break
+                if result0 and result1:  # Judgements satisfied
+                    condition.condition_flag = False
+                else:  # Judgements not satisfied
+                    condition.condition_flag = True
 
-                elif condition.test_info['condition_method_0'] == ';':  # Format is: If a or b
+            elif condition.test_info['condition_method_0'] == ';':  # Format is: If a or b
 
-                    if result0 or result1:  # Judgements satisfied
-                        break
-                time.sleep(1)
+                if result0 or result1:  # Judgements satisfied
+                    condition.condition_flag = False
+                else:  # Judgements not satisfied
+                    condition.condition_flag = True
 
         elif element_num == 3:  # Num is 3
-            cls.t1 = time.time()
 
-            while True:
-                result0 = cls.judge_one(
-                    condition,
-                    condition.test_info['judgement_item_0'],
-                    condition.test_info['judgement_method_0'],
-                    condition.test_info['judgement_value_0']
-                )  # Get result of 1st judgement
-                result1 = cls.judge_one(
-                    condition,
-                    condition.test_info['judgement_item_1'],
-                    condition.test_info['judgement_method_1'],
-                    condition.test_info['judgement_value_1']
-                )  # Get result of 2nd judgement
-                result2 = cls.judge_one(
-                    condition,
-                    condition.test_info['judgement_item_2'],
-                    condition.test_info['judgement_method_2'],
-                    condition.test_info['judgement_value_2']
-                )  # Get result of 3rd judgement
+            result0 = Parse_Custom_Test.judge_one(
+                condition,
+                condition.test_info['judgement_item_0'],
+                condition.test_info['judgement_method_0'],
+                condition.test_info['judgement_value_0']
+            )  # Get result of 1st judgement
+            result1 = Parse_Custom_Test.judge_one(
+                condition,
+                condition.test_info['judgement_item_1'],
+                condition.test_info['judgement_method_1'],
+                condition.test_info['judgement_value_1']
+            )  # Get result of 2nd judgement
+            result2 = Parse_Custom_Test.judge_one(
+                condition,
+                condition.test_info['judgement_item_2'],
+                condition.test_info['judgement_method_2'],
+                condition.test_info['judgement_value_2']
+            )  # Get result of 3rd judgement
 
-                if condition.test_info['condition_method_0'] == ',' \
-                        and condition.test_info['condition_method_1'] == ',':  # Format is: If a and b and c
+            if condition.test_info['condition_method_0'] == ',' \
+                    and condition.test_info['condition_method_1'] == ',':  # Format is: If a and b and c
 
-                    if result0 and result1 and result2:  # Judgements satisfied
-                        break
+                if result0 and result1 and result2:  # Judgements satisfied
+                    condition.condition_flag = False
+                else:  # Judgements not satisfied
+                    condition.condition_flag = True
 
-                elif condition.test_info['condition_method_0'] == ';' \
-                        and condition.test_info['condition_method_1'] == ';':  # Format is: If a or b or c
+            elif condition.test_info['condition_method_0'] == ';' \
+                    and condition.test_info['condition_method_1'] == ';':  # Format is: If a or b or c
 
-                    if result0 or result1 or result2:  # Judgements satisfied
-                        break
+                if result0 or result1 or result2:  # Judgements satisfied
+                    condition.condition_flag = False
+                else:  # Judgements not satisfied
+                    condition.condition_flag = True
 
-                elif condition.test_info['condition_method_0'] == ',' \
-                        and condition.test_info['condition_method_1'] == ';':  # Format is: If a and b or c
+            elif condition.test_info['condition_method_0'] == ',' \
+                    and condition.test_info['condition_method_1'] == ';':  # Format is: If a and b or c
 
-                    if condition.test_info['position'] == '1,2':  # Format is: If (a and b) or c
+                if condition.test_info['position'] == '1,2':  # Format is: If (a and b) or c
 
-                        if (result0 and result1) or result2:  # Judgements satisfied
-                            break
+                    if (result0 and result1) or result2:  # Judgements satisfied
+                        condition.condition_flag = False
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = True
 
-                    elif condition.test_info['position'] == '2,3':  # Format is: If a and (b or c)
+                elif condition.test_info['position'] == '2,3':  # Format is: If a and (b or c)
 
-                        if result0 and (result1 or result2):  # Judgements satisfied
-                            break
+                    if result0 and (result1 or result2):  # Judgements satisfied
+                        condition.condition_flag = False
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = True
 
-                    else:
-                        raise ValueError
+                else:
+                    raise ValueError
 
-                elif condition.test_info['condition_method_0'] == ';' \
-                        and condition.test_info['condition_method_1'] == ',':  # Format is: If a or b and c
+            elif condition.test_info['condition_method_0'] == ';' \
+                    and condition.test_info['condition_method_1'] == ',':  # Format is: If a or b and c
 
-                    if condition.test_info['position'] == '1,2':  # Format is: If (a or b) and c
+                if condition.test_info['position'] == '1,2':  # Format is: If (a or b) and c
 
-                        if (result0 or result1) and result2:  # Judgements satisfied
-                            break
+                    if (result0 or result1) and result2:  # Judgements satisfied
+                        condition.condition_flag = False
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = True
 
-                    elif condition.test_info['position'] == '2,3':  # Format is: If a or (b and c)
+                elif condition.test_info['position'] == '2,3':  # Format is: If a or (b and c)
 
-                        if result0 or (result1 and result2):  # Judgements satisfied
-                            break
+                    if result0 or (result1 and result2):  # Judgements satisfied
+                        condition.condition_flag = False
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = True
 
-                    else:
-                        raise ValueError
+                else:
+                    raise ValueError
 
         return condition
 
-    @classmethod
-    def judge_one(cls, condition, key, cond, value):
+    @staticmethod
+    def judge_one(condition, key, cond, value):
         """
         One function to judge <, >, <=, >=, ==, !=
 
@@ -304,12 +316,229 @@ class Parse_Custom_Test:
             result = judge(item, cond, value)
 
         elif re.search('Time', key, re.I) is not None:  # If judgement item is time
-            cls.t2 = time.time()
-            item = cls.t2 - cls.t1
+            condition.stop_time = time.time()
+            item = condition.stop_time - condition.start_time
             result = judge(item, cond, value)
 
         return result
 
+    @staticmethod
+    def parse_param_string(parameter):
+        result = {}
+        if parameter != parameter:  # parameter is nan
+            result = {None: None}
+            return result
+
+        elif re.search('=', parameter) is None:  # parameter don't have function name
+            result[parameter] = [None]
+            return result
+
+        elif re.search(';', parameter) is None:  # parameter has function name
+            key = parameter.split('=')[0]  # str on the left of symbol
+            value = parameter.split('=')[1]  # str on the right of symbol
+
+            if re.search(':', parameter) is not None and\
+                    re.search('(\{.+:.+\})', parameter) is None:  # parameter has more than 1 step
+
+                if value.count(':') == 1:  # value has start, end
+                    start_value = float(value.split(':')[0])
+                    end_value = float(value.split(':')[1])
+                    result[key] = [start_value, end_value]
+
+                elif value.count(':') == 2:  # value has start, step, end
+                    start_value = float(value.split(':')[0])
+                    step_value = float(value.split(':')[1])
+                    end_value = float(value.split(':')[2])
+                    target_value = []
+
+                    while start_value <= end_value:
+                        target_value.append(start_value)
+                        start_value = start_value + step_value
+                    result[key] = target_value
+
+            else:    # parameter has only 1 step
+                result[key] = [value]
+                return result
+
+        elif re.search(';', parameter) is not None:  # parameter has more than 1 command
+            command = parameter.split(';')
+
+            for i in range(len(command)):
+                temp = Parse_Custom_Test.parse_param_string(command[i])
+                result.update(temp)
+
+        return result
+
+    @staticmethod
+    def parse_one_param(parameter):
+        """
+        Parse one parameter of value
+
+        Args:
+            parameter: Parameter need to be parsed
+
+        Returns:
+            result: Parsed result, format: dict
+        """
+
+        result = Parse_Custom_Test.parse_param_string(parameter)
+        step_length = 1
+
+        for value in result.values():
+            step_length = len(value) * step_length  # Calculate total length
+
+        if step_length == 0:
+            return result
+
+        for key, value in result.items():
+            new_value = []
+            multiple = int(step_length / len(value))  # Calculate multiple of this parameter needed
+
+            for i in range(multiple):
+                new_value.extend(value)  # Complete parameter according to total step length
+            result[key] = new_value  # Put parameter into dict
+
+        return result
+
+    @staticmethod
+    def parse_one_next(parameter):
+        """
+        Parse next value
+
+        Args:
+            parameter: Parameter need to be parsed
+
+        Returns:
+            result: Parsed result, format: list
+        """
+        result = []
+        if parameter != parameter:  # parameter is nan
+            pass
+
+        elif re.match('\d+', parameter) is not None:  # parameter is a number
+            result.extend(parameter)
+
+        elif re.match('{|}', parameter) is not None:  # parameter is a small cycle
+            result = \
+                list(
+                    map(
+                        int, re.findall('\d+', parameter)
+                    )
+                )  # Get all cycle step and convert into a list
+
+        return result
+
+    @staticmethod
+    def parse_file(condition):
+        """
+        Parse test file, and extend all test items.
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        file = condition.file
+        """Extend Parameter function"""
+        new_file_temp = []
+        target_file_temp = []
+        for i in range(len(file.index)):
+            this_line = (file.loc[file.index == i]).copy(deep=True)
+            function = Parse_Custom_Test.parse_param_string(str(this_line.at[i, 'Function']))
+            this_line.at[i, 'Function'] = function
+            parameter = Parse_Custom_Test.parse_one_param(str(this_line.at[i, 'Parameter']))
+            this_line.at[i, 'Parameter'] = parameter
+            next = Parse_Custom_Test.parse_one_next(str(this_line.at[i, 'Next']))
+            this_line.at[i, 'Next'] = next
+            if len(list(parameter.values())[0]) <= 1:  # No step in Parameter
+                new_file_temp.append(this_line)    # Append this test item of file to new file
+            else:  # A step in Parameter
+                for j in range(len(list(parameter.values())[0])):
+                    temp = this_line.copy(deep=True)
+                    temp.at[i, 'Parameter'] = {}
+                    for key, value in parameter.items():
+                        temp.loc[i, 'Parameter'].update({key: value[j]})
+                    new_file_temp.append(temp)    # Append this test item of file to new file
+        new_file = pd.concat(new_file_temp, axis=0)
+        new_file.reset_index(drop=True, inplace=True)
+        """Extend Next function"""
+        for i in range(len(new_file.index)):
+            this_line = (new_file.loc[new_file.index == i]).copy(deep=True)
+            next = this_line.at[i, 'Next']
+            if len(next) > 1:  # A cycle in Next
+                for j in range(len(next)):
+                    if this_line.at[i, 'Step'] == next[j]:  # Current line is the line that needed to add
+                        temp = this_line.copy(deep=True)
+                        temp.at[i, 'Next'] = np.nan
+                        """Solve the problem of nested object sharing"""
+                        temp.at[i, 'Function'] = copy.deepcopy(this_line.at[i, 'Function'])
+                        temp.at[i, 'Parameter'] = copy.deepcopy(this_line.at[i, 'Parameter'])
+                    else:  # Current line is not the line that needed to add
+                        temp = (new_file.loc[new_file['Step'] == next[j]]).copy(deep=True)
+                        temp.at[temp.index[0], 'Next'] = np.nan
+                        """Solve the problem of nested object sharing"""
+                        temp.at[temp.index[0], 'Function'] = copy.deepcopy(temp.at[temp.index[0], 'Function'])
+                        temp.at[temp.index[0], 'Parameter'] = copy.deepcopy(temp.at[temp.index[0], 'Parameter'])
+                    target_file_temp.append(temp)  # Append this test item of file to new file
+            else:  # No cycle in Next
+                target_file_temp.append(this_line)  # Append this test item of file to new file
+        target_file = pd.concat(target_file_temp, axis=0)
+        target_file.reset_index(drop=True, inplace=True)
+        """Update test file information"""
+        for i in range(len(target_file.index)):
+            target_file.at[i, 'Step'] = i
+            target_file.at[i, 'Function'] = Parse_Custom_Test.update_function(target_file.at[i, 'Function'])
+            target_file.at[i, 'Parameter'] = Parse_Custom_Test.update_parameter(target_file.at[i, 'Parameter'])
+            target_file.at[i, 'Next'] = Parse_Custom_Test.update_next(target_file.at[i, 'Next'])
+        condition.file = target_file
+        return condition
+
+    @staticmethod
+    def update_function(parameter):
+
+        for key, value in parameter.items():
+
+            if value is None or value[0] is None:
+                parameter[key] = None
+            else:
+                parameter[key] = value[0]
+        return parameter
+
+    @staticmethod
+    def update_parameter(parameter):
+
+        for key, value in parameter.items():
+
+            if isinstance(value, list):
+                try:
+                    value = eval(value[0])
+                except:
+                    value = str(value[0])
+                parameter[key] = value
+
+            elif isinstance(value, str):
+                try:
+                    parameter[key] = eval(value)
+                except:
+                    parameter[key] = str(value)
+
+        return parameter
+
+    @staticmethod
+    def update_next(parameter):
+
+        if isinstance(parameter, list):
+
+            if parameter == []:
+                parameter = np.nan
+
+            else:
+                parameter = int(parameter[0])
+
+        return parameter
+    #
+    #
     # @staticmethod
     # def cal_voltage(condition):
     #     """

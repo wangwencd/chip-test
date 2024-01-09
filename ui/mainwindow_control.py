@@ -238,7 +238,6 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         Stop program.
         """
 
-
     def get_message(self, message):
         """
         Get message from queue, show message.

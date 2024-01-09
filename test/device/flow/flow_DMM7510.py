@@ -59,7 +59,10 @@ class Flow_DMM7510(DMM7510):
         Returns:
             condition: Condition information summary
         """
-        option = condition.measurement_info['Option']
+        try:
+            option = condition.measurement_info['Option']
+        except:
+            option = condition.test_info['Option']
 
         for key, value in function_list.items():
 

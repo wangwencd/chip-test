@@ -106,8 +106,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
         """
         name = self.tabWidget_function.currentWidget().objectName()  # Return specific function of mcu
 
-        """I2C"""
-        if re.search('I2C', name, re.I) is not None:
+        if re.search('I2C', name, re.I) is not None:  # I2C
 
             reg_data = self.reg_inversion(Reg_Operation.hex_to_dec(self.lineEdit_I2C_reg_value.text()))
             reg_address = Reg_Operation.hex_to_dec(self.lineEdit_I2C_reg_address.text())
@@ -123,8 +122,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             }
             self.cond = flow.I2C_write(self.cond)
 
-        """GPIO"""
-        if re.search('GPIO', name, re.I) is not None:
+        elif re.search('GPIO', name, re.I) is not None:  # GPIO
             self.cond.test_info['Msg'] = {
                 'gpio_num': int(self.lineEdit_GPIO_number.text()),
                 'set_value': int(self.lineEdit_GPIO_value.text()),
@@ -134,11 +132,30 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             }
             self.cond = flow.GPIO_write(self.cond)
 
-        """RST"""
-        if re.search('RST', name, re.I) is not None:
+        elif re.search('RST', name, re.I) is not None:  # RST
             self.cond.test_info['Msg'] = {
             }
             self.cond = flow.Reset(self.cond)
+
+        elif re.search('SPI', name, re.I) is not None:  # SPI
+
+            reg_data = self.reg_inversion(Reg_Operation.hex_to_dec(self.lineEdit_SPI_reg_value.text()))
+            reg_address = Reg_Operation.hex_to_dec(self.lineEdit_SPI_reg_address.text())
+            data_buf = reg_address + reg_data
+
+            self.cond.test_info['Msg'] = {
+                'cfg': int(self.lineEdit_SPI_config.text()),
+                'fstb': int(self.lineEdit_SPI_first_bit.text()),
+                'cpol': int(self.lineEdit_SPI_CPOL.text()),
+                'cpha': int(self.lineEdit_SPI_CHPA.text()),
+                'size': int(self.lineEdit_SPI_data_size.text()),
+                'cspol': int(self.lineEdit_SPI_CSPOL.text()),
+                'freq': int(self.lineEdit_SPI_frequency.text()),
+                'data_buf': data_buf,
+                'rx_size': 0,
+                'bus_num': int(self.lineEdit_SPI_bus_num.text()),
+            }
+            self.cond = flow.SPI_write(self.cond)
 
     def read_mcu(self, flow):
         """
@@ -149,8 +166,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
         """
         name = self.tabWidget_function.currentWidget().objectName()  # Return specific function of mcu
 
-        """I2C"""
-        if re.search('I2C', name, re.I) is not None:
+        if re.search('I2C', name, re.I) is not None:  # I2C
             data_buf = Reg_Operation.hex_to_dec(
                 self.lineEdit_I2C_reg_address.text()
             )
@@ -174,8 +190,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
                 data_buf_string = data_buf_string + data + ','
             self.lineEdit_I2C_reg_value.setText(data_buf_string)
 
-        """GPIO"""
-        if re.search('GPIO', name, re.I) is not None:
+        elif re.search('GPIO', name, re.I) is not None:  # GPIO
             self.cond.test_info['Msg'] = {
                 'gpio_num': int(self.lineEdit_GPIO_number.text()),
                 'get_value': int(self.lineEdit_GPIO_value.text()),
@@ -186,11 +201,38 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             self.cond = flow.GPIO_read(self.cond)
             self.lineEdit_GPIO_value.setText(str(self.cond.measurement_info['Msg'].get_value))
 
-        """RST"""
-        if re.search('RST', name, re.I) is not None:
+        elif re.search('RST', name, re.I) is not None:  # RST
             self.cond.test_info['Msg'] = {
             }
             self.cond = flow.Reset(self.cond)
+
+        elif re.search('SPI', name, re.I) is not None:  # SPI
+            data_buf = Reg_Operation.hex_to_dec(
+                self.lineEdit_SPI_reg_address.text()
+            )
+            self.cond.test_info['Msg'] = {
+                'cfg': int(self.lineEdit_SPI_config.text()),
+                'fstb': int(self.lineEdit_SPI_first_bit.text()),
+                'cpol': int(self.lineEdit_SPI_CPOL.text()),
+                'cpha': int(self.lineEdit_SPI_CHPA.text()),
+                'size': int(self.lineEdit_SPI_data_size.text()),
+                'cspol': int(self.lineEdit_SPI_CSPOL.text()),
+                'freq': int(self.lineEdit_SPI_frequency.text()),
+                'data_buf': data_buf,
+                'rx_size': int(self.lineEdit_SPI_reg_number.text()),
+                'bus_num': int(self.lineEdit_SPI_bus_num.text()),
+            }
+            self.cond = flow.SPI_read(self.cond)
+            data_buf_string = ''
+            try:
+                reg_data = self.reg_inversion(self.cond.measurement_info['Msg'].data_buf)
+            except:
+                self.lineEdit_SPI_reg_value.setText(data_buf_string)
+                return
+            data_buf = Reg_Operation.dec_to_hex(reg_data)
+            for data in data_buf:
+                data_buf_string = data_buf_string + data + ','
+            self.lineEdit_SPI_reg_value.setText(data_buf_string)
 
     def reg_inversion(self, reg_list: list):
 

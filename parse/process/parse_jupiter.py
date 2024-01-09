@@ -60,6 +60,35 @@ class Parse_Jupiter:
             'Current': np.array([]),
             'Data': np.array([]),
         }
+        if 'Temperature_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Temperature_Setting_Flag'] = bool(int(condition.test_info['Temperature_Setting_Flag']))
+        else:
+            condition.test_info['Temperature_Setting_Flag'] = True
+
+        if 'Power_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Power_Setting_Flag'] = bool(int(condition.test_info['Power_Setting_Flag']))
+        else:
+            condition.test_info['Power_Setting_Flag'] = True
+
+        if 'ADC_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['ADC_Setting_Flag'] = bool(int(condition.test_info['ADC_Setting_Flag']))
+        else:
+            condition.test_info['ADC_Setting_Flag'] = True
+
+        if 'ADC_Measurement_Flag' in condition.test_info.keys():
+            condition.test_info['ADC_Measurement_Flag'] = bool(int(condition.test_info['ADC_Measurement_Flag']))
+        else:
+            condition.test_info['ADC_Measurement_Flag'] = True
+
+        if 'Control_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Control_Setting_Flag'] = bool(int(condition.test_info['Control_Setting_Flag']))
+        else:
+            condition.test_info['Control_Setting_Flag'] = True
+
+        if 'Data_Average_Flag' in condition.test_info.keys():
+            condition.test_info['Data_Average_Flag'] = bool(int(condition.test_info['Data_Average_Flag']))
+        else:
+            condition.test_info['Data_Average_Flag'] = True
 
         return condition
 
@@ -84,5 +113,34 @@ class Parse_Jupiter:
             'Data2': np.array([]),
             'Data3': np.array([]),
         }
+        if 'Temperature_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Temperature_Setting_Flag'] = bool(int(condition.test_info['Temperature_Setting_Flag']))
+        else:
+            condition.test_info['Temperature_Setting_Flag'] = True
+
+        if 'Power_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Power_Setting_Flag'] = bool(int(condition.test_info['Power_Setting_Flag']))
+        else:
+            condition.test_info['Power_Setting_Flag'] = True
+
+        if 'ADC_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['ADC_Setting_Flag'] = bool(int(condition.test_info['ADC_Setting_Flag']))
+        else:
+            condition.test_info['ADC_Setting_Flag'] = True
+
+        if 'ADC_Measurement_Flag' in condition.test_info.keys():
+            condition.test_info['ADC_Measurement_Flag'] = bool(int(condition.test_info['ADC_Measurement_Flag']))
+        else:
+            condition.test_info['ADC_Measurement_Flag'] = True
+
+        if 'Control_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Control_Setting_Flag'] = bool(int(condition.test_info['Control_Setting_Flag']))
+        else:
+            condition.test_info['Control_Setting_Flag'] = True
+
+        if 'Data_Average_Flag' in condition.test_info.keys():
+            condition.test_info['Data_Average_Flag'] = bool(int(condition.test_info['Data_Average_Flag']))
+        else:
+            condition.test_info['Data_Average_Flag'] = True
 
         return condition
