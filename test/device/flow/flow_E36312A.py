@@ -7,6 +7,7 @@ File: flow_E36312A.py
 """
 import logging
 from test.device.control.E36312A import E36312A
+import re
 
 L = logging.getLogger('Main')
 
@@ -51,11 +52,11 @@ class Flow_E36312A(E36312A):
             self.enter_independent_mode()
             self.set_channel_voltage_current(voltage, current, channel=channel)
 
-        elif channel == '2+3':
+        elif re.search('2\+3', channel) is not None:
             self.enter_series_mode()
             self.set_channel_voltage_current(voltage, current)
 
-        elif channel == '2|3':
+        elif re.search('2\|3', channel) is not None:
             self.enter_parallel_mode()
             self.set_channel_voltage_current(voltage, current)
 
@@ -76,7 +77,7 @@ class Flow_E36312A(E36312A):
         if channel == '1' or channel == '2' or channel == '3':
             voltage, current = self.query_channel_all(channel)
 
-        elif channel == '2+3' or channel == '2|3':
+        elif re.search('(2\+3)|(2\|3)', channel) is not None:
             voltage, current = self.query_channel_all()
 
         condition.measurement_info['Voltage'] = voltage
@@ -99,7 +100,7 @@ class Flow_E36312A(E36312A):
         if channel == '1' or channel == '2' or channel == '3':
             self.channel_on(channel=channel)
 
-        elif channel == '2+3' or '2|3':
+        elif re.search('(2\+3)|(2\|3)', channel) is not None:
             self.channel_on()
 
         return condition
@@ -119,7 +120,7 @@ class Flow_E36312A(E36312A):
         if channel == '1' or channel == '2' or channel == '3':
             self.channel_off(channel=channel)
 
-        elif channel == '2+3' or channel == '2|3':
+        elif re.search('(2\+3)|(2\|3)', channel) is not None:
             self.channel_off()
 
         return condition
@@ -155,11 +156,11 @@ class Flow_E36312A(E36312A):
             self.enter_independent_mode()
             self.set_channel_voltage(voltage, channel=channel)
 
-        elif channel == '2+3':
+        elif re.search('2\+3', channel) is not None:
             self.enter_series_mode()
             self.set_channel_voltage(voltage)
 
-        elif channel == '2|3':
+        elif re.search('2\|3', channel) is not None:
             self.enter_parallel_mode()
             self.set_channel_voltage(voltage)
 
@@ -182,11 +183,11 @@ class Flow_E36312A(E36312A):
             self.enter_independent_mode()
             self.set_channel_current(current, channel=channel)
 
-        elif channel == '2+3':
+        elif re.search('2\+3', channel) is not None:
             self.enter_series_mode()
             self.set_channel_current(current)
 
-        elif channel == '2|3':
+        elif re.search('2\|3', channel) is not None:
             self.enter_parallel_mode()
             self.set_channel_current(current)
 

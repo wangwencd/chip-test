@@ -412,8 +412,8 @@ class Parse_Custom_Test:
             result: Parsed result, format: list
         """
         result = []
-        if parameter != parameter:  # parameter is nan
-            pass
+        if parameter != parameter or parameter == 'nan':  # parameter is nan
+            return np.nan
 
         elif re.match('\d+', parameter) is not None:  # parameter is a number
             result.extend(parameter)
@@ -439,10 +439,17 @@ class Parse_Custom_Test:
         Returns:
             condition: Condition information summary
         """
+        def copy_deep(df):
+            """Custom function for deep copying using Numba."""
+            target = copy.deepcopy(df)
+            for column_name in df.columns:
+                target.at[target.index[0], column_name] = copy.deepcopy(df.at[df.index[0], column_name])
+            return target
         file = condition.file
         """Extend Parameter function"""
         new_file_temp = []
         target_file_temp = []
+        t1 = time.time()
         for i in range(len(file.index)):
             this_line = (file.loc[file.index == i]).copy(deep=True)
             function = Parse_Custom_Test.parse_param_string(str(this_line.at[i, 'Function']))
@@ -462,29 +469,38 @@ class Parse_Custom_Test:
                     new_file_temp.append(temp)    # Append this test item of file to new file
         new_file = pd.concat(new_file_temp, axis=0)
         new_file.reset_index(drop=True, inplace=True)
+        t2 = time.time()
+        print(t2 - t1)
         """Extend Next function"""
         for i in range(len(new_file.index)):
-            this_line = (new_file.loc[new_file.index == i]).copy(deep=True)
+            this_line = copy_deep(new_file.loc[new_file.index == i])
+            # this_line = (new_file.loc[new_file.index == i]).copy(deep=True)
             next = this_line.at[i, 'Next']
-            if len(next) > 1:  # A cycle in Next
+            if next != next or len(next) <= 1:
+                target_file_temp.append(this_line)  # Append this test item of file to new file
+            elif len(next) > 1:  # A cycle in Next
                 for j in range(len(next)):
                     if this_line.at[i, 'Step'] == next[j]:  # Current line is the line that needed to add
-                        temp = this_line.copy(deep=True)
+                        # temp = this_line.copy(deep=True)
+                        temp = copy_deep(this_line)
                         temp.at[i, 'Next'] = np.nan
                         """Solve the problem of nested object sharing"""
-                        temp.at[i, 'Function'] = copy.deepcopy(this_line.at[i, 'Function'])
-                        temp.at[i, 'Parameter'] = copy.deepcopy(this_line.at[i, 'Parameter'])
+                        # temp.at[i, 'Function'] = copy.deepcopy(this_line.at[i, 'Function'])
+                        # temp.at[i, 'Parameter'] = copy.deepcopy(this_line.at[i, 'Parameter'])
                     else:  # Current line is not the line that needed to add
-                        temp = (new_file.loc[new_file['Step'] == next[j]]).copy(deep=True)
+                        # temp = (new_file.loc[new_file['Step'] == next[j]]).copy(deep=True)
+                        temp = copy_deep(new_file.loc[new_file['Step'] == next[j]])
                         temp.at[temp.index[0], 'Next'] = np.nan
                         """Solve the problem of nested object sharing"""
-                        temp.at[temp.index[0], 'Function'] = copy.deepcopy(temp.at[temp.index[0], 'Function'])
-                        temp.at[temp.index[0], 'Parameter'] = copy.deepcopy(temp.at[temp.index[0], 'Parameter'])
+                        # temp.at[temp.index[0], 'Function'] = copy.deepcopy(temp.at[temp.index[0], 'Function'])
+                        # temp.at[temp.index[0], 'Parameter'] = copy.deepcopy(temp.at[temp.index[0], 'Parameter'])
                     target_file_temp.append(temp)  # Append this test item of file to new file
             else:  # No cycle in Next
                 target_file_temp.append(this_line)  # Append this test item of file to new file
         target_file = pd.concat(target_file_temp, axis=0)
         target_file.reset_index(drop=True, inplace=True)
+        t3 = time.time()
+        print(t3 - t2)
         """Update test file information"""
         for i in range(len(target_file.index)):
             target_file.at[i, 'Step'] = i
@@ -492,6 +508,8 @@ class Parse_Custom_Test:
             target_file.at[i, 'Parameter'] = Parse_Custom_Test.update_parameter(target_file.at[i, 'Parameter'])
             target_file.at[i, 'Next'] = Parse_Custom_Test.update_next(target_file.at[i, 'Next'])
         condition.file = target_file
+        t4 = time.time()
+        print(t4 - t3)
         return condition
 
     @staticmethod
