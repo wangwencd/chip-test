@@ -351,10 +351,17 @@ class Parse_Custom_Test:
                     end_value = float(value.split(':')[2])
                     target_value = []
 
-                    while start_value <= end_value:
-                        target_value.append(start_value)
-                        start_value = start_value + step_value
-                    result[key] = target_value
+                    if start_value <= end_value:
+                        while start_value <= end_value:
+                            target_value.append(start_value)
+                            start_value = start_value + step_value
+                        result[key] = target_value
+
+                    elif start_value >= end_value:
+                        while start_value >= end_value:
+                            target_value.append(start_value)
+                            start_value = start_value + step_value
+                        result[key] = target_value
 
             else:    # parameter has only 1 step
                 result[key] = [value]
