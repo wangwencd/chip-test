@@ -74,6 +74,7 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         )  # lineedit output slot function
         self.action_instrument.triggered.connect(self.show_intrumentwindow)  # instrument action slot function
         self.action_mcu.triggered.connect(self.show_mcuwindow)  # MCU action slot function
+        self.action_userguide.triggered.connect(self.show_userguide)  # User guide action slot function
 
         self.msg.signal1.connect(self.get_message)
         """Show UI interface"""
@@ -348,3 +349,11 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
 
         elif reply == QMessageBox.No:  # If answer is no
             event.ignore()
+
+    def show_userguide(self):
+        """
+        Show user guide
+        """
+        path = self.path + '/guide'
+        file_list = File_Operation.find_file(path, 'pdf')
+        os.startfile(file_list[0])

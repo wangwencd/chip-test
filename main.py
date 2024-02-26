@@ -14,7 +14,6 @@ from ui.mainwindow_control import Mainwindow_Control
 Logger()
 app = QApplication(sys.argv)
 
-
 def main():
     """
     Main function
