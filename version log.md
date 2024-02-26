@@ -171,3 +171,8 @@ AutoTest Version
 
 20240115-update custom test fucntion
 1.Update custom test, could control lots of instruments and devices in various communication protocol, including step, cycle, skipping, judging functions.
+
+20240122-add user guide
+1.Add user guide, could open user guide by UI.
+2.Update requirements list.
+3.Add some comments for custom test.

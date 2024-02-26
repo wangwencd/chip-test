@@ -323,7 +323,16 @@ class Parse_Custom_Test:
         return result
 
     @staticmethod
-    def parse_param_string(parameter):
+    def parse_param_string(parameter: str):
+        """
+        Parse one Function string in test file.
+
+        Args:
+            parameter: Function string needed to be parsed.
+
+        Returns:
+            result: Parsed result, format: dict
+        """
         result = {}
         if parameter != parameter:  # parameter is nan
             result = {None: None}
@@ -351,13 +360,13 @@ class Parse_Custom_Test:
                     end_value = float(value.split(':')[2])
                     target_value = []
 
-                    if start_value <= end_value:
+                    if start_value <= end_value:  # start is less than end in value
                         while start_value <= end_value:
                             target_value.append(start_value)
                             start_value = start_value + step_value
                         result[key] = target_value
 
-                    elif start_value >= end_value:
+                    elif start_value >= end_value:  # start is more than end in value
                         while start_value >= end_value:
                             target_value.append(start_value)
                             start_value = start_value + step_value
@@ -371,18 +380,18 @@ class Parse_Custom_Test:
             command = parameter.split(';')
 
             for i in range(len(command)):
-                temp = Parse_Custom_Test.parse_param_string(command[i])
+                temp = Parse_Custom_Test.parse_param_string(command[i])  # Repeat parsing
                 result.update(temp)
 
         return result
 
     @staticmethod
-    def parse_one_param(parameter):
+    def parse_one_param(parameter: str):
         """
-        Parse one parameter of value
+        Parse one Parameter string in test file.
 
         Args:
-            parameter: Parameter need to be parsed
+            parameter: Parameter string need to be parsed
 
         Returns:
             result: Parsed result, format: dict
@@ -410,10 +419,10 @@ class Parse_Custom_Test:
     @staticmethod
     def parse_one_next(parameter):
         """
-        Parse next value
+        Parse one Next string in test file.
 
         Args:
-            parameter: Parameter need to be parsed
+            parameter: Next string need to be parsed
 
         Returns:
             result: Parsed result, format: list
@@ -459,11 +468,11 @@ class Parse_Custom_Test:
         t1 = time.time()
         for i in range(len(file.index)):
             this_line = (file.loc[file.index == i]).copy(deep=True)
-            function = Parse_Custom_Test.parse_param_string(str(this_line.at[i, 'Function']))
+            function = Parse_Custom_Test.parse_param_string(str(this_line.at[i, 'Function']))  # Parse function string
             this_line.at[i, 'Function'] = function
-            parameter = Parse_Custom_Test.parse_one_param(str(this_line.at[i, 'Parameter']))
+            parameter = Parse_Custom_Test.parse_one_param(str(this_line.at[i, 'Parameter']))  # Parse parameter string
             this_line.at[i, 'Parameter'] = parameter
-            next = Parse_Custom_Test.parse_one_next(str(this_line.at[i, 'Next']))
+            next = Parse_Custom_Test.parse_one_next(str(this_line.at[i, 'Next']))  # Parse next string
             this_line.at[i, 'Next'] = next
             if len(list(parameter.values())[0]) <= 1:  # No step in Parameter
                 new_file_temp.append(this_line)    # Append this test item of file to new file
@@ -474,8 +483,8 @@ class Parse_Custom_Test:
                     for key, value in parameter.items():
                         temp.loc[i, 'Parameter'].update({key: value[j]})
                     new_file_temp.append(temp)    # Append this test item of file to new file
-        new_file = pd.concat(new_file_temp, axis=0)
-        new_file.reset_index(drop=True, inplace=True)
+        new_file = pd.concat(new_file_temp, axis=0)  # Convert a list into a dataframe
+        new_file.reset_index(drop=True, inplace=True)  # Reset index of dataframe
         t2 = time.time()
         print(t2 - t1)
         """Extend Next function"""
@@ -504,8 +513,8 @@ class Parse_Custom_Test:
                     target_file_temp.append(temp)  # Append this test item of file to new file
             else:  # No cycle in Next
                 target_file_temp.append(this_line)  # Append this test item of file to new file
-        target_file = pd.concat(target_file_temp, axis=0)
-        target_file.reset_index(drop=True, inplace=True)
+        target_file = pd.concat(target_file_temp, axis=0)  # Convert a list into a dataframe
+        target_file.reset_index(drop=True, inplace=True)  # Reset index of dataframe
         t3 = time.time()
         print(t3 - t2)
         """Update test file information"""
@@ -520,46 +529,70 @@ class Parse_Custom_Test:
         return condition
 
     @staticmethod
-    def update_function(parameter):
+    def update_function(parameter: dict):
+        """
+        Update Function string in test file.
 
+        Args:
+            parameter: Function string before updating
+
+        Returns:
+            parameter: Function string after updating
+        """
         for key, value in parameter.items():
 
-            if value is None or value[0] is None:
-                parameter[key] = None
-            else:
-                parameter[key] = value[0]
+            if value is None or value[0] is None:  # Format: {A: None} or {A: [None]}
+                parameter[key] = None  # To format: {A: None}
+            else:  # Format: {A: [B]}
+                parameter[key] = value[0]  # To format: {A: B}
         return parameter
 
     @staticmethod
-    def update_parameter(parameter):
+    def update_parameter(parameter: dict):
+        """
+        Update Parameter string in test file.
 
+        Args:
+            parameter: Parameter string before updating
+
+        Returns:
+            parameter: Parameter string after updating
+        """
         for key, value in parameter.items():
 
-            if isinstance(value, list):
+            if isinstance(value, list):  # Format: {A:[B]}
                 try:
-                    value = eval(value[0])
+                    value = eval(value[0])  # To format: {A: B(float)}
                 except:
-                    value = str(value[0])
+                    value = str(value[0])  # To format: {A: B(str)}
                 parameter[key] = value
 
-            elif isinstance(value, str):
+            elif isinstance(value, str):  # Format: {A:(str)}
                 try:
-                    parameter[key] = eval(value)
+                    parameter[key] = eval(value)  # To format: {A: B(float)} or {A: B(dict)} or {A: B(list)}
                 except:
-                    parameter[key] = str(value)
+                    parameter[key] = str(value)  # To format: {A: B(str)}
 
         return parameter
 
     @staticmethod
-    def update_next(parameter):
+    def update_next(parameter: list):
+        """
+        Update Next string in test file.
 
-        if isinstance(parameter, list):
+        Args:
+            parameter: Next string before updating
+
+        Returns:
+            parameter: Next string after updating
+        """
+        if isinstance(parameter, list):  # Format: [A]
 
             if parameter == []:
-                parameter = np.nan
+                parameter = np.nan  # To format: np.nan
 
             else:
-                parameter = int(parameter[0])
+                parameter = int(parameter[0])  # To format: A(int)
 
         return parameter
     #
