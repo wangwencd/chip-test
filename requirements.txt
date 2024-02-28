@@ -1,6 +1,7 @@
 altgraph==0.17.3
 contourpy==1.0.7
 cycler==0.11.0
+et-xmlfile==1.1.0
 fonttools==4.38.0
 importlib-metadata==6.0.0
 importlib-resources==5.10.2
@@ -9,6 +10,7 @@ llvmlite==0.39.1
 matplotlib==3.7.0
 modbus-tk==1.1.2
 numpy==1.23.0
+openpyxl==3.1.2
 packaging==23.0
 pandas==1.4.3
 pefile==2023.2.7

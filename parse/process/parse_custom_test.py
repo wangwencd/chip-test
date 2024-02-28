@@ -76,7 +76,7 @@ class Parse_Custom_Test:
                 condition.test_info['judgement_item' + '_' + str(index)], # Get judgement item
                 condition.test_info['judgement_method' + '_' + str(index)], # Get judgement method
                 condition.test_info['judgement_value' + '_' + str(index)] # Get judgement target value
-            ] = re.split('(<|>|<=|>=|==|!=)', value)
+            ] = re.split('(<=|>=|<|>|==|!=)', value)
         """Get priority of condition method"""
         if re.search('\(.+\)', string) is not None:
             condition.test_info['position'] = str(re.findall('<|>|<=|>=|==|!=|\(|\)', string).index('(') + 1) +\
