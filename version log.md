@@ -176,3 +176,7 @@ AutoTest Version
 1.Add user guide, could open user guide by UI.
 2.Update requirements list.
 3.Add some comments for custom test.
+
+20240228-modify custom test
+1.Modify custom test parse error about condtion judging.
+2.Modify third-party libraries in requirements.txt.
