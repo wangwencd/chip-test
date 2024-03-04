@@ -113,7 +113,10 @@ class Control_Flow(object):
         Returns:
             condition: Condition information summary
         """
-        instrument_name = str(condition.measurement_info['Instrument'])
+        try:
+            instrument_name = str(condition.measurement_info['Instrument'])
+        except:
+            instrument_name = str(condition.test_info['Instrument'])
         flow = self.confirm_flow_class(condition, instrument_name)
         condition = flow.measure(condition)
 
