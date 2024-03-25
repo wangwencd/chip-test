@@ -1,5 +1,4 @@
 altgraph==0.17.3
-beautifulsoup4==4.12.3
 contourpy==1.0.7
 cycler==0.11.0
 et-xmlfile==1.1.0
@@ -7,7 +6,6 @@ fonttools==4.38.0
 importlib-metadata==6.0.0
 importlib-resources==5.10.2
 kiwisolver==1.4.4
-llvmlite==0.39.1
 matplotlib==3.7.0
 modbus-tk==1.1.2
 numpy==1.23.0
@@ -31,7 +29,6 @@ pytz==2022.1
 PyVISA==1.14.0
 pywin32-ctypes==0.2.0
 six==1.16.0
-soupsieve==2.5
 tomli==2.0.1
 typing_extensions==4.3.0
 zipp==3.13.0

@@ -13,7 +13,6 @@ import re
 import time
 
 import numpy as np
-import numba as nb
 import pandas as pd
 import traceback
 import matplotlib.pyplot as plt
@@ -989,5 +988,5 @@ if __name__ == '__main__':
     path = r'C:\Users\ww\Desktop\new folder\test'
 
     condition.config_path = path
-    condition.tool_func = 'plot_best_fit'
+    condition.tool_func = 'plot_linearity'
     condition = ToolPlot.plot_main(condition)

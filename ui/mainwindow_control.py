@@ -6,14 +6,12 @@ Date: 2022/9/21 11:21
 File: mainwindow_control.py
 """
 import os
-import sys
 import logging
-import threading
 import traceback
 import configparser
 
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
-from PyQt5.QtGui import QIcon, QCloseEvent
+from PyQt5.QtGui import QIcon
 
 from ui import *
 from .ui_mainwindow import Ui_ui_MainWindow
@@ -26,6 +24,7 @@ from test.process import Test_Process_Dict
 from output.process import Output_Process_Dict
 from output.result.result_output import Result_Output
 from parse.file.file_operation import File_Operation
+from parse.multiprocess.pool_thread import pool
 
 L = logging.getLogger('Main')
 
@@ -197,16 +196,16 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         """
         Create a thread and run program.
         """
-        t1 = threading.Thread(target=self.start)
-        t1.daemon = True
-        t1.start()
+        # t1 = threading.Thread(target=self.start)
+        # t1.daemon = True
+        # t1.start()
+        future = pool.submit(self.start)
 
     def start(self):
         """
         Specific items in program.
         """
         self.pushButton_start_start.setEnabled(False)
-
         try:
             """Parsing step"""
             for key, value in Parse_Process_Dict.items():  # Choose parsing
