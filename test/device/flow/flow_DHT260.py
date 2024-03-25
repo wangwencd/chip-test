@@ -108,4 +108,58 @@ class Flow_DHT260(DHT260):
 
         return condition
 
+    def set_temp(self, condition):
+        """
+        Set temperature
 
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        self.set_temperature(condition.test_info['Temperature'])
+
+        return condition
+
+    def set_hum(self, condition):
+        """
+        Set humidity
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        self.set_humidity(condition.test_info['Humidity'])
+
+        return condition
+
+    def measure_temp(self, condition):
+        """
+        Measure temperature
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        condition.measurement_info['Temperature'] = self.query_temperature()
+
+        return condition
+
+    def measure_hum(self, condition):
+        """
+        Measure humidity
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        condition.measurement_info['Humidity'] = self.query_humidity()
+
+        return condition
