@@ -143,7 +143,7 @@ class Ui_ui_MainWindow(object):
         self.verticalLayout_5.addWidget(self.radioButton_jupiter_test_noise)
         self.toolBox_function.addItem(self.page_jupiter_test, "")
         self.page_natrium_test = QtWidgets.QWidget()
-        self.page_natrium_test.setGeometry(QtCore.QRect(0, 0, 163, 78))
+        self.page_natrium_test.setGeometry(QtCore.QRect(0, 0, 180, 78))
         self.page_natrium_test.setObjectName("page_natrium_test")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.page_natrium_test)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
@@ -294,7 +294,7 @@ class Ui_ui_MainWindow(object):
 
     def retranslateUi(self, ui_MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        ui_MainWindow.setWindowTitle(_translate("ui_MainWindow", "Transepic_AutoTest_V2.06.00 "))
+        ui_MainWindow.setWindowTitle(_translate("ui_MainWindow", "Transepic_AutoTest_V2.07.00 "))
         self.groupBox.setTitle(_translate("ui_MainWindow", "Function"))
         self.radioButton_battery_lab.setText(_translate("ui_MainWindow", "Battery lab"))
         self.toolBox_function.setItemText(self.toolBox_function.indexOf(self.page_battery_lab), _translate("ui_MainWindow", "Battery lab"))

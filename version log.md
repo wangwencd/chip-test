@@ -189,3 +189,9 @@
 - 1.Add some new function in flow_DHT260.py
 - 2.Resign format of version log
 - 3.Update requirements.txt, reduce the volume of application
+
+### 20240329-add CH341A 
+- 1.Add CH341A instrument, including I2C, SPI function
+- 2.Update user guide, add instrument function descriptions in custom test
+- 3.Modify mcu package info to adjust CH341A's structure
+- 4.Add projcet path.py, easy to find project root path.

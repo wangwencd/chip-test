@@ -467,8 +467,8 @@ class Test_Jupiter(Control_Flow):
                             time.sleep(measurement_period)
                             continue
 
-                        elif len(condition.measurement_info['Msg'].data_buf) >= 1:
-                            result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+                        elif len(condition.measurement_info['Msg']) >= 1:
+                            result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'])
                             if result >= 32768:
                                 result = result - 65536
                             data[j].append(result)
@@ -890,8 +890,8 @@ class Test_Jupiter(Control_Flow):
                         L.error("Could not receive data")
                         break
 
-                    elif len(condition.measurement_info['Msg'].data_buf) >= 1:  # If master receive right datas
-                        result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+                    elif len(condition.measurement_info['Msg']) >= 1:  # If master receive right datas
+                        result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'])
 
                     else:  # If master receive wrong data
                         L.error("Could not receive data")

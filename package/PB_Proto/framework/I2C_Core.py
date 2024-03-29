@@ -41,7 +41,7 @@ def seti2cmesg(**kwargs):
 def I2C_Proto_unpack_core(buf):
     pb_info = I2C_Proto_pb2.I2C_Proto()
     pb_info.ParseFromString(buf)
-    return pb_info
+    return pb_info.data_buf
 
 
 def I2C_Proto_pack_core(**kwargs):

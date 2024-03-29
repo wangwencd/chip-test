@@ -467,11 +467,11 @@ class Test_Natrium(Control_Flow):
                             time.sleep(measurement_period)
                             continue
 
-                        elif len(condition.measurement_info['Msg'].data_buf) >= 1:
-                            del condition.measurement_info['Msg'].data_buf[0]
-                            del condition.measurement_info['Msg'].data_buf[-1]
-                            condition.measurement_info['Msg'].data_buf.reverse()
-                            result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+                        elif len(condition.measurement_info['Msg']) >= 1:
+                            del condition.measurement_info['Msg'][0]
+                            del condition.measurement_info['Msg'][-1]
+                            condition.measurement_info['Msg'].reverse()
+                            result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'])
                             if result >= 32768:
                                 result = result - 65536
                             data[j].append(result)

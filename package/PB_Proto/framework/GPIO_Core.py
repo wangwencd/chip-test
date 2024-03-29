@@ -21,7 +21,7 @@ def setgpiomesg(**kwargs):
 def GPIO_Proto_unpack_core(buf):
     pb_info = GPIO_Proto_pb2.GPIO_Proto()
     pb_info.ParseFromString(buf)
-    return pb_info
+    return pb_info.get_value
 
 
 def GPIO_Proto_pack_core(**kwargs):

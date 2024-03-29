@@ -9,6 +9,7 @@ from test.device.serial.serial_common import Serial_Common
 from test.device.visa.visa_common import Visa_Common
 from test.device.rtu.rtu_common import RTU_Common
 from test.device.tcp.tcp_common import TCP_Common
+from test.device.ch.ch_common import CH_Common
 
 Communication_dict = {
     'Class name': 'Class',
@@ -16,4 +17,5 @@ Communication_dict = {
     'visa': Visa_Common,
     'rtu': RTU_Common,
     'tcp': TCP_Common,
+    'ch': CH_Common,
 }

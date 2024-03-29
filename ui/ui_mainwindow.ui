@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Transepic_AutoTest_V2.06.00 </string>
+   <string>Transepic_AutoTest_V2.07.00 </string>
   </property>
   <property name="styleSheet">
    <string notr="true">
@@ -261,7 +261,7 @@ QPushButton:pressed{
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>163</width>
+            <width>180</width>
             <height>78</height>
            </rect>
           </property>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>879</width>
-    <height>570</height>
+    <width>886</width>
+    <height>572</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,7 +55,7 @@ QPushButton:pressed{
        <widget class="QGroupBox" name="groupBox_connection">
         <property name="minimumSize">
          <size>
-          <width>120</width>
+          <width>150</width>
           <height>0</height>
          </size>
         </property>
@@ -73,19 +73,12 @@ QPushButton:pressed{
            </property>
            <property name="maximumSize">
             <size>
-             <width>40</width>
+             <width>50</width>
              <height>16777215</height>
             </size>
            </property>
            <property name="text">
             <string>Device</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="QPushButton" name="pushButton_open">
-           <property name="text">
-            <string>Open deivce</string>
            </property>
           </widget>
          </item>
@@ -115,9 +108,63 @@ QPushButton:pressed{
              <string>F413CH</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>CH341A</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_89">
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Protocol</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="comboBox_protocol">
+           <property name="minimumSize">
+            <size>
+             <width>60</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="editable">
+            <bool>false</bool>
+           </property>
+           <item>
+            <property name="text">
+             <string>serial</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ch</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item row="2" column="0" colspan="2">
+          <widget class="QPushButton" name="pushButton_open">
+           <property name="text">
+            <string>Open deivce</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
           <widget class="QPushButton" name="pushButton_close">
            <property name="text">
             <string>Close deivce</string>
