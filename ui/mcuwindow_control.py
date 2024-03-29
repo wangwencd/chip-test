@@ -44,24 +44,35 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
         self.pushButton_write.clicked.connect(lambda: self.set_parameter(1))  # Set func push button plot function
         self.pushButton_read.clicked.connect(lambda: self.set_parameter(2))  # Set func push button plot function
 
-    def find_mcu_name(self):
+    def find_device_name(self):
         """
-        Return mcu name from tabWidget_instrument.currentWidget
+        Return device name from tabWidget_instrument.currentWidget
 
         Returns:
-            new_name: Instrument name
+            new_name: Device name
         """
         new_name = self.comboBox_device.currentText()  # Get tab name from tabWidget_instrument
 
         return new_name
+
+    def find_device_communication(self):
+        """
+        Return device name from tabWidget_instrument.currentWidget
+
+        Returns:
+            new_name: Device communication
+        """
+        protocol = self.comboBox_protocol.currentText()  # Get tab name from tabWidget_instrument
+
+        return protocol
 
     def open_mcu(self):
         """
         Open mcu plot function
         """
         try:
-            self.cond.test_info['Instrument'] = self.find_mcu_name()  # Get instrument string
-            self.cond.test_info['Communication'] = 'serial'  # Get communication string
+            self.cond.test_info['Instrument'] = self.find_device_name()  # Get instrument string
+            self.cond.test_info['Communication'] = self.find_device_communication()  # Get communication string
             self.cond = self.flow.open(self.cond)  # Open instrument function of class
             L.info('Open instrument: ' + self.cond.test_info['Instrument'] +
                    ', Communication: ' + self.cond.test_info['Communication'])
@@ -74,7 +85,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
         Close mcu plot function
         """
         try:
-            self.cond.test_info['Instrument'] = self.find_mcu_name()  # Get instrument string
+            self.cond.test_info['Instrument'] = self.find_device_name()  # Get instrument string
             self.cond = self.flow.close(self.cond)  # Open instrument function of class
             L.info('Open instrument: ' + self.cond.test_info['Instrument'] +
                    ', Communication: ' + self.cond.test_info['Communication'])
@@ -87,7 +98,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
         Set func plot function
         """
         try:
-            self.cond.test_info['Instrument'] = self.find_mcu_name()  # Get instrument string
+            self.cond.test_info['Instrument'] = self.find_device_name()  # Get instrument string
             flow = self.flow.confirm_flow_class(self.cond, self.cond.test_info['Instrument'])  # Confirm class of flow
             if function == 1:
                 self.write_mcu(flow)  # Go into function of specific class
@@ -181,7 +192,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             self.cond = flow.I2C_read(self.cond)
             data_buf_string = ''
             try:
-                reg_data = self.reg_inversion(self.cond.measurement_info['Msg'].data_buf)
+                reg_data = self.reg_inversion(self.cond.measurement_info['Msg'])
             except:
                 self.lineEdit_I2C_reg_value.setText(data_buf_string)
                 return
@@ -199,7 +210,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
                 'gpio_pad': int(self.lineEdit_GPIO_pad.text()),
             }
             self.cond = flow.GPIO_read(self.cond)
-            self.lineEdit_GPIO_value.setText(str(self.cond.measurement_info['Msg'].get_value))
+            self.lineEdit_GPIO_value.setText(str(self.cond.measurement_info['Msg']))
 
         elif re.search('RST', name, re.I) is not None:  # RST
             self.cond.test_info['Msg'] = {
@@ -225,7 +236,7 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             self.cond = flow.SPI_read(self.cond)
             data_buf_string = ''
             try:
-                reg_data = self.reg_inversion(self.cond.measurement_info['Msg'].data_buf)
+                reg_data = self.reg_inversion(self.cond.measurement_info['Msg'])
             except:
                 self.lineEdit_SPI_reg_value.setText(data_buf_string)
                 return

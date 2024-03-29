@@ -54,14 +54,14 @@ class MAX32670(object):
                 L.info(self.name + ' write address: [' + str(parse_result[0]) + '], value: ' + str(parse_result[1:]))
 
             elif func_flag == 2:  # I2C read function
-                parse_result = Reg_Operation.dec_to_hex(msg.data_buf)
+                parse_result = Reg_Operation.dec_to_hex(msg)
                 L.info(self.name + ' read value: ' + str(parse_result))
 
             elif func_flag == 3:  # GPIO write function
                 L.info(self.name + ' write PIN: [' + str(msg['gpio_num']) + '], value: [' + str(msg['set_value']) + ']')
 
             elif func_flag == 4:  # GPIO write function
-                L.info(self.name + ' read PIN: [' + str(msg.gpio_num) + '], value: [' + str(msg.get_value) + ']')
+                L.info(self.name + ' read PIN: [' + str(msg) + '], value: [' + str(msg.get_value) + ']')
 
             elif func_flag == 5:  # Reset function
                 L.info(self.name + ' reset')
@@ -85,7 +85,7 @@ class MAX32670(object):
                     )
 
             elif func_flag == 7:  # SPI read function
-                parse_result = Reg_Operation.dec_to_hex(msg.data_buf)
+                parse_result = Reg_Operation.dec_to_hex(msg)
                 L.info(self.name + ' read value: ' + str(parse_result))
 
     def write_I2C(self, msg):

@@ -445,8 +445,8 @@ class Test_Lithium(Control_Flow):
                     condition = self.operate(condition, 'Reset')
                     time.sleep(measurement_period)
 
-                elif len(condition.measurement_info['Msg'].data_buf) >= 1:
-                    result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+                elif len(condition.measurement_info['Msg']) >= 1:
+                    result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'])
                     if result > 65000:
                         result = result - 65536
                     data.append(result)
@@ -620,8 +620,8 @@ class Test_Lithium(Control_Flow):
                     L.error("Could not receive data")
                     break
 
-                elif len(condition.measurement_info['Msg'].data_buf) >= 1:  # If master receive right datas
-                    result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+                elif len(condition.measurement_info['Msg']) >= 1:  # If master receive right datas
+                    result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'])
 
                 else:  # If master receive wrong data
                     L.error("Could not receive data")
@@ -908,8 +908,8 @@ class Test_Lithium(Control_Flow):
                         condition.test_info['Communication'] = condition.test_info['Control_Communication']
                         condition = self.open(condition)
 
-                    elif len(condition.measurement_info['Msg'].data_buf) >= 1:
-                        result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf)
+                    elif len(condition.measurement_info['Msg']) >= 1:
+                        result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'])
                         if result > 65000:
                             result = result - 65536
                         break
@@ -1253,7 +1253,7 @@ class Test_Lithium(Control_Flow):
         data = []
         for i in range(num):
             condition = self.operate(condition, 'I2C_read')
-            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf))
+            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg']))
             time.sleep(1)
         var = np.var(data)
         L.info('Var is ' + str(var))
@@ -1282,7 +1282,7 @@ class Test_Lithium(Control_Flow):
         data = []
         for i in range(num):
             condition = self.operate(condition, 'I2C_read')
-            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf))
+            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg']))
             time.sleep(1)
         var = np.var(data)
         L.info('Var is ' + str(var))
@@ -1311,7 +1311,7 @@ class Test_Lithium(Control_Flow):
         data = []
         for i in range(num):
             condition = self.operate(condition, 'I2C_read')
-            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf))
+            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg']))
             time.sleep(1)
         var = np.var(data)
         L.info('Var is ' + str(var))
@@ -1340,7 +1340,7 @@ class Test_Lithium(Control_Flow):
         data = []
         for i in range(num):
             condition = self.operate(condition, 'I2C_read')
-            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg'].data_buf))
+            data.append(Reg_Operation.dec_to_one(condition.measurement_info['Msg']))
             time.sleep(1)
         var = np.var(data)
         L.info('Var is ' + str(var))
@@ -1464,7 +1464,7 @@ class Test_Lithium(Control_Flow):
         time.sleep(0.1)
         while True:
             condition = self.operate(condition, 'I2C_read')
-            temp = Reg_Operation.dec_to_hex(condition.measurement_info['Msg'].data_buf)
+            temp = Reg_Operation.dec_to_hex(condition.measurement_info['Msg'])
             result = Reg_Operation.hex_to_one(temp)
             if result == '0x0b':
                 break
@@ -1588,7 +1588,7 @@ class Test_Lithium(Control_Flow):
         time.sleep(0.1)
         while True:
             condition = self.operate(condition, 'I2C_read')
-            temp = Reg_Operation.dec_to_hex(condition.measurement_info['Msg'].data_buf)
+            temp = Reg_Operation.dec_to_hex(condition.measurement_info['Msg'])
             result = Reg_Operation.hex_to_one(temp)
             if result == '0x07':
                 break

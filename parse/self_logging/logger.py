@@ -11,6 +11,7 @@ import logging
 import logging.handlers
 import time
 
+from parse.file.project_path import pro_path
 from parse.file.file_operation import File_Operation
 from parse.multiprocess.queue import Q
 
@@ -36,12 +37,8 @@ class Logger:
         """
         Create log file and store path
         """
-        path = os.path.abspath(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        ).replace('\\', '/')# Get path of project
-
-        self.path = path + '/log/'
-        File_Operation.create_file(self.path) # Create log file
+        self.path = pro_path + '/log/'
+        File_Operation.create_file(self.path)  # Create log file
 
     def set_handler(self):
         """
