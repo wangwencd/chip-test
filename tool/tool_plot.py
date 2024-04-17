@@ -65,14 +65,16 @@ class ToolPlot(object):
         y = np.array(file.iloc[:, 4])
         msb = 32768  # Data convert param, format: int or None
         lsb = None  # Data convert param, format: int or None
+        bit = 16  # Bit number
+        bit_depth = int(math.pow(2, bit))  # Bit depth
 
         for i in range(len(y)):
 
             if msb is not None and y[i] >= msb:
-                y[i] = y[i] - 65536
+                y[i] = y[i] - bit_depth
 
             elif lsb is not None and y[i] < lsb:
-                y[i] = y[i] + 65536
+                y[i] = y[i] + bit_depth
         """Calculate fitting parameter"""
         fitting_a, fitting_b = np.polyfit(x, y, 1)  # Calculate fitting paramter
         new_y = fitting_a * x + fitting_b  # Get fitting data
@@ -590,8 +592,8 @@ class ToolPlot(object):
         t1 = time.time()
         msb = 32768  # Data convert param, format: int or None
         lsb = None  # Data convert param, format: int or None
-        FSR = 4.096
-        method = 1  # Flag of INL fitting
+        bit = 16  # Bit number
+        bit_depth = int(math.pow(2, bit))  # Bit depth
         file = pd.read_csv(config_path)
         original_code = np.array(file.iloc[:, 4], dtype=np.int32)
         original_measurement_voltage = np.array(file.iloc[:, 2], dtype=np.float64)
@@ -600,122 +602,121 @@ class ToolPlot(object):
         for i in range(len(original_code)):
 
             if msb is not None and original_code[i] >= msb:
-                original_code[i] = original_code[i] - 65536
+                original_code[i] = original_code[i] - bit_depth
 
             elif lsb is not None and original_code[i] < lsb:
-                original_code[i] = original_code[i] + 65536
-        if method == 1:
-            """Get original data"""
-            min_code = min(original_code)
-            max_code = max(original_code)
-            data_num = np.array(range(0, max_code - min_code + 1), dtype=np.int32)
-            code = min_code
-            fitting_voltage = np.zeros([max_code - min_code + 1], dtype=np.float64)
-            code_time = np.zeros([max_code - min_code + 1], dtype=np.int32)
-            # for i in range(len(fitting_voltage)):
-            #     voltage = original_voltage[np.where(original_code == code)]
-            #     code_time[i] = len(voltage)
-            #
-            #     if len(voltage) == 0:  # Missing code
-            #         voltage = original_voltage[np.where(original_code == (code - 1))]
-            #         fitting_voltage[i] = max(voltage)
-            #         print(str(code) + ' is missing code!')
-            #
-            #     elif len(voltage) == 1:
-            #         fitting_voltage[i] = voltage[0]
-            #         print(str(code) + ' is occurred only one time!')
-            #
-            #     else:
-            #         fitting_voltage[i] = np.median(voltage)
-            #
-            #     code = code + 1
-            measurement_voltage = []
-            setting_voltage = []
-            code_time = []
-            data = []
-            for j in range(len(data_num)):
+                original_code[i] = original_code[i] + bit_depth
+        """Get original data"""
+        min_code = min(original_code)
+        max_code = max(original_code)
+        data_num = np.array(range(0, max_code - min_code + 1), dtype=np.int32)
+        code = min_code
+        fitting_voltage = np.zeros([max_code - min_code + 1], dtype=np.float64)
+        code_time = np.zeros([max_code - min_code + 1], dtype=np.int32)
+        # for i in range(len(fitting_voltage)):
+        #     voltage = original_voltage[np.where(original_code == code)]
+        #     code_time[i] = len(voltage)
+        #
+        #     if len(voltage) == 0:  # Missing code
+        #         voltage = original_voltage[np.where(original_code == (code - 1))]
+        #         fitting_voltage[i] = max(voltage)
+        #         print(str(code) + ' is missing code!')
+        #
+        #     elif len(voltage) == 1:
+        #         fitting_voltage[i] = voltage[0]
+        #         print(str(code) + ' is occurred only one time!')
+        #
+        #     else:
+        #         fitting_voltage[i] = np.median(voltage)
+        #
+        #     code = code + 1
+        measurement_voltage = []
+        setting_voltage = []
+        code_time = []
+        data = []
+        for j in range(len(data_num)):
 
-                if len(np.where(original_code == code)[0]) <= 0 or \
-                        len(np.where(original_code == code)[0]) >= 12:
-                    pass
-
-                else:
-                    measurement_voltage.append(
-                        np.median(original_measurement_voltage[np.where(original_code == code)]))
-                    setting_voltage.append(np.median(original_setting_voltage[np.where(original_code == code)]))
-                    code_time.append(len(original_measurement_voltage[np.where(original_code == code)]))
-                    data.append(code)
-                code = code + 1
-            data_num = data
-
-            poly = np.polyfit(data_num, measurement_voltage, 1)
-            new_fitting_voltage = np.polyval(poly, data_num)
-            result_voltage = measurement_voltage - new_fitting_voltage
-
-            """Calculate INL"""
-            result_inl = result_voltage / poly[0]
-            result_dnl = np.zeros(len(data_num))
-
-            for i in range(len(result_inl)):
-
-                if i == 0:
-                    result_dnl[i] = result_inl[i]
-                else:
-                    result_dnl[i] = result_inl[i] - result_inl[i - 1]
-            """Plot figure"""
-            fig, ax = plt.subplots(1, 2)
-            ax[0].plot(
-                data_num,
-                result_dnl
-            )  # Plot data figure
-            ax[0].set_title('DNL')  # Add title
-            ax[0].set_xlabel('Code')  # Add x label
-            ax[0].set_ylabel('DNL(LSB)')  # Add y label
-            ax[0].grid(True)  # Show grid
-
-            ax[1].plot(
-                data_num,
-                result_inl
-            )  # Plot data figure
-            ax[1].set_title('INL')  # Add title
-            ax[1].set_xlabel('Code')  # Add x label
-            ax[1].set_ylabel('INL(LSB)')  # Add y label
-            ax[1].grid(True)  # Show grid
-
-            """Save figure"""
-            output = np.array([data_num, result_dnl, result_inl, measurement_voltage, new_fitting_voltage, code_time])
-
-            if saving_path is not None:
-                Result_Output.to_png(
-                    plt,
-                    saving_path,
-                    name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result',
-                )
-                Result_Output.to_csv(
-                    np.transpose(output),
-                    path=saving_path,
-                    name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result',
-                    header='Data, DNL, INL, Vol, F-Vol, Times',
-                    length='8'
-                )
+            if len(np.where(original_code == code)[0]) <= 0 or \
+                    len(np.where(original_code == code)[0]) >= 12:
+                pass
 
             else:
-                Result_Output.to_png(
-                    plt,
-                    os.path.dirname(config_path),
-                    name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result'
-                )
-                Result_Output.to_csv(
-                    np.transpose(output),
-                    path=os.path.dirname(config_path),
-                    name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result',
-                    header='Data, DNL, INL, Vol, F-Vol, Times',
-                    length='8'
-                )
-            """Show figure"""
-            # plt.show()
-            t2 = time.time()
-            print(t2 - t1)
+                measurement_voltage.append(
+                    np.median(original_measurement_voltage[np.where(original_code == code)]))
+                setting_voltage.append(np.median(original_setting_voltage[np.where(original_code == code)]))
+                code_time.append(len(original_measurement_voltage[np.where(original_code == code)]))
+                data.append(code)
+            code = code + 1
+        data_num = data
+
+        poly = np.polyfit(data_num, measurement_voltage, 1)
+        new_fitting_voltage = np.polyval(poly, data_num)
+        result_voltage = measurement_voltage - new_fitting_voltage
+
+        """Calculate INL"""
+        result_inl = result_voltage / poly[0]
+        result_dnl = np.zeros(len(data_num))
+
+        for i in range(len(result_inl)):
+
+            if i == 0:
+                result_dnl[i] = result_inl[i]
+            else:
+                result_dnl[i] = result_inl[i] - result_inl[i - 1]
+        """Plot figure"""
+        fig, ax = plt.subplots(1, 2)
+        ax[0].plot(
+            data_num,
+            result_dnl
+        )  # Plot data figure
+        ax[0].set_title('DNL')  # Add title
+        ax[0].set_xlabel('Code')  # Add x label
+        ax[0].set_ylabel('DNL(LSB)')  # Add y label
+        ax[0].grid(True)  # Show grid
+
+        ax[1].plot(
+            data_num,
+            result_inl
+        )  # Plot data figure
+        ax[1].set_title('INL')  # Add title
+        ax[1].set_xlabel('Code')  # Add x label
+        ax[1].set_ylabel('INL(LSB)')  # Add y label
+        ax[1].grid(True)  # Show grid
+
+        """Save figure"""
+        output = np.array([data_num, result_dnl, result_inl, measurement_voltage, new_fitting_voltage, code_time])
+
+        if saving_path is not None:
+            Result_Output.to_png(
+                plt,
+                saving_path,
+                name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result',
+            )
+            Result_Output.to_csv(
+                np.transpose(output),
+                path=saving_path,
+                name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result',
+                header='Data, DNL, INL, Vol, F-Vol, Times',
+                length='8'
+            )
+
+        else:
+            Result_Output.to_png(
+                plt,
+                os.path.dirname(config_path),
+                name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result'
+            )
+            Result_Output.to_csv(
+                np.transpose(output),
+                path=os.path.dirname(config_path),
+                name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result',
+                header='Data, DNL, INL, Vol, F-Vol, Times',
+                length='8'
+            )
+        """Show figure"""
+        # plt.show()
+        t2 = time.time()
+        print(t2 - t1)
 
     @staticmethod
     def plot_4_best_fit(config_path, saving_path=None):
@@ -981,12 +982,77 @@ class ToolPlot(object):
                 t2 = time.time()
                 print(t2 - t1)
 
+    @staticmethod
+    def plot_noise(config_path, saving_path=None):
+        """
+        Calculate noise plot figure
+
+        Args:
+            config_path: Original data path, format: str.
+            saving_path: Saving figure path, format: str
+        """
+        """Set parameter"""
+        t1 = time.time()
+        msb = 32768  # Data convert param, format: int or None
+        lsb = None  # Data convert param, format: int or None
+        bit = 16  # Bit number
+        bit_depth = int(math.pow(2, bit))  # Bit depth
+        file = pd.read_csv(config_path)
+        original_code = np.array(file.iloc[:, 4], dtype=np.int32)
+
+        for i in range(len(original_code)):
+
+            if msb is not None and original_code[i] >= msb:
+                original_code[i] = original_code[i] - bit_depth
+
+            elif lsb is not None and original_code[i] < lsb:
+                original_code[i] = original_code[i] + bit_depth
+
+        """Calculate data"""
+        mean_value = np.mean(original_code)  # Calculate median value of original_code
+        median_value = np.median(original_code)  # Calculate median value of original_code
+        std_deviation = np.std(original_code)  # Calculate std deviation of original_code
+        min_value = min(original_code)
+        max_value = max(original_code)
+        dataframe = pd.DataFrame(original_code)
+        """Plot figure"""
+        # plt.hist(original_code, bins=30, alpha=0.8)
+        dataframe.hist()
+        plt.xlabel('Code')
+        plt.ylabel('Number')
+        plt.title('Histogram of Code')
+        plt.figtext(0.95, 0.95, f'Standard Deviation: {std_deviation:.2f}', horizontalalignment='right', verticalalignment='top')
+        plt.figtext(0.95, 0.90, f'Mean: {mean_value:.2f}', horizontalalignment='right', verticalalignment='top')
+        plt.figtext(0.95, 0.85, f'Median: {median_value:.2f}', horizontalalignment='right', verticalalignment='top')
+        plt.figtext(0.95, 0.80, f'Max: {max_value:.2f}', horizontalalignment='right', verticalalignment='top')
+        plt.figtext(0.95, 0.75, f'Min: {min_value:.2f}', horizontalalignment='right', verticalalignment='top')
+        """Save figure"""
+
+        if saving_path is not None:
+            Result_Output.to_png(
+                plt,
+                saving_path,
+                name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result',
+            )
+
+        else:
+            Result_Output.to_png(
+                plt,
+                os.path.dirname(config_path),
+                name=(os.path.basename(config_path)).split(os.path.splitext(config_path)[-1])[0] + '-result'
+            )
+
+        """Show figure"""
+        # plt.show()
+        t2 = time.time()
+        print(t2 - t1)
+
 if __name__ == '__main__':
     from test.condition.condition import Condition
     condition = Condition()
 
-    path = r'C:\Users\ww\Desktop\new folder\test'
+    path = r'C:\Users\ww\Desktop\jupiter\Noise'
 
     condition.config_path = path
-    condition.tool_func = 'plot_linearity'
+    condition.tool_func = 'plot_noise'
     condition = ToolPlot.plot_main(condition)

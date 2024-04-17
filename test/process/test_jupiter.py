@@ -454,7 +454,7 @@ class Test_Jupiter(Control_Flow):
                         condition.test_info['Msg'] = (self.refresh_I2C(
                             i2c_address=i2c_slave[j],
                             data_buf=[int(condition.test_info['Reg_Address'], 16)],
-                            rx_size=4,
+                            rx_size=2,
                             bus_num=bus_num
                         )).copy()
                         condition = self.operate(condition, 'I2C_read')
@@ -536,13 +536,13 @@ class Test_Jupiter(Control_Flow):
         if condition.test_info['Control_Setting_Flag'] is True:
                 for j in range(len(i2c_slave)):
                     if condition.test_info['Data_Average_Flag'] is True:
-                        condition.output_info['Data'] = np.append(
-                            condition.output_info['Data'],
+                        condition.output_info['Data0'] = np.append(
+                            condition.output_info['Data0'],
                             round(np.median(data[j]))
                         )  # Update data to output
                     else:
-                        condition.output_info['Data'] = np.append(
-                            condition.output_info['Data'],
+                        condition.output_info['Data' + str(j)] = np.append(
+                            condition.output_info['Data' + str(j)],
                             data[j]
                         )  # Update data to output
 
