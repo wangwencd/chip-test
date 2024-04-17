@@ -195,3 +195,11 @@
 - 2.Update user guide, add instrument function descriptions in custom test
 - 3.Modify mcu package info to adjust CH341A's structure
 - 4.Add projcet path.py, easy to find project root path.
+
+### 20240415-modify Jupiter parse error
+- 1.Modify Jupiter parse error
+
+### 20240417-Add plot_noise function
+- 1.Modify Jupiter parse error
+- 2.Add plot_noise function in tool_plot.py
+- 3.Update parameters in plot_linearity and plot_best_fit.

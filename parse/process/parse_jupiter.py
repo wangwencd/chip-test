@@ -30,15 +30,7 @@ class Parse_Jupiter:
         condition.test_VI_flag = True
 
         name = condition.func_name
-
-        if re.search('ramp_multi', name, re.I) is not None:
-            condition = Parse_Jupiter.parse_ramp_multi(condition)
-
-        elif re.search('ramp', name, re.I) is not None:
-            condition = Parse_Jupiter.parse_ramp(condition)
-
-        elif re.search('noise', name, re.I) is not None:
-            condition = Parse_Jupiter.parse_ramp_multi(condition)
+        condition = Parse_Jupiter.parse_ramp_multi(condition)
 
         return condition
 
@@ -57,7 +49,7 @@ class Parse_Jupiter:
             'Time': np.array([]),
             'Temperature': np.array([]),
             'Voltage': np.array([]),
-            'Current': np.array([]),
+            'Set_Voltage': np.array([]),
             'Data': np.array([]),
         }
         if 'Temperature_Setting_Flag' in condition.test_info.keys():
@@ -107,7 +99,7 @@ class Parse_Jupiter:
             'Time': np.array([]),
             'Temperature': np.array([]),
             'Voltage': np.array([]),
-            'Current': np.array([]),
+            'Set_Voltage': np.array([]),
             'Data0': np.array([]),
             'Data1': np.array([]),
             'Data2': np.array([]),
