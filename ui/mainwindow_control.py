@@ -212,6 +212,7 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
 
                 if key == self.cond.func:
                     self.cond = value.parse(self.cond)
+                    break
 
             """Testing step"""
             for key, value in Test_Process_Dict.items():  # Choose testing
@@ -219,12 +220,14 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
                 if key == self.cond.func:
                     test = value()
                     self.cond = test.test(self.cond)
+                    break
 
             """Output step"""
             for key, value in Output_Process_Dict.items():  # Choose output
 
                 if key == self.cond.func:
                     self.cond = value.output(self.cond)
+                    break
 
         except:
             L.error(traceback.format_exc())

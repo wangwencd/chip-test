@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import traceback
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 
 from output.result.result_output import Result_Output
 
@@ -602,7 +603,7 @@ class ToolPlot(object):
         for i in range(len(original_code)):
 
             if msb is not None and original_code[i] >= msb:
-                original_code[i] = original_code[i] - bit_depth
+                    original_code[i] = original_code[i] - bit_depth
 
             elif lsb is not None and original_code[i] < lsb:
                 original_code[i] = original_code[i] + bit_depth
@@ -1015,9 +1016,10 @@ class ToolPlot(object):
         min_value = min(original_code)
         max_value = max(original_code)
         dataframe = pd.DataFrame(original_code)
+        fig, ax1 = plt.subplots(1, 1)
+        dataframe.hist(ax=ax1, color='blue')
         """Plot figure"""
-        # plt.hist(original_code, bins=30, alpha=0.8)
-        dataframe.hist()
+        ax1.xaxis.set_major_formatter(FuncFormatter(lambda x, _: '{:.0f}'.format(x)))
         plt.xlabel('Code')
         plt.ylabel('Number')
         plt.title('Histogram of Code')
@@ -1051,8 +1053,8 @@ if __name__ == '__main__':
     from test.condition.condition import Condition
     condition = Condition()
 
-    path = r'C:\Users\ww\Desktop\jupiter\Noise'
+    path = r'C:\Users\ww\Desktop\jupiter\INL\1'
 
     condition.config_path = path
-    condition.tool_func = 'plot_noise'
+    condition.tool_func = 'plot_best_fit'
     condition = ToolPlot.plot_main(condition)
