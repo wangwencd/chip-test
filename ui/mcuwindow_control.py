@@ -149,24 +149,37 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             self.cond = flow.Reset(self.cond)
 
         elif re.search('SPI', name, re.I) is not None:  # SPI
+            data_buf = self.reg_inversion(Reg_Operation.hex_to_dec(
+                self.lineEdit_SPI_DO.text()
+            ))
+            self.cond.test_info['Msg'] = (refresh_SPI(
+                bus_num=self.lineEdit_SPI_bus_num.text(),
+                cfg=self.lineEdit_SPI_config.text(),
+                cpol=self.lineEdit_SPI_CPOL.text(),
+                cpha=self.lineEdit_SPI_CHPA.text(),
+                fstb=self.lineEdit_SPI_first_bit.text(),
+                size=self.lineEdit_SPI_data_size.text(),
+                frequency=self.lineEdit_SPI_frequency.text(),
+                data_buf=data_buf,
+                rx_size=len(data_buf),
+            )).copy()
 
-            reg_data = self.reg_inversion(Reg_Operation.hex_to_dec(self.lineEdit_SPI_reg_value.text()))
-            reg_address = Reg_Operation.hex_to_dec(self.lineEdit_SPI_reg_address.text())
-            data_buf = reg_address + reg_data
-
-            self.cond.test_info['Msg'] = {
-                'cfg': int(self.lineEdit_SPI_config.text()),
-                'fstb': int(self.lineEdit_SPI_first_bit.text()),
-                'cpol': int(self.lineEdit_SPI_CPOL.text()),
-                'cpha': int(self.lineEdit_SPI_CHPA.text()),
-                'size': int(self.lineEdit_SPI_data_size.text()),
-                'cspol': int(self.lineEdit_SPI_CSPOL.text()),
-                'freq': int(self.lineEdit_SPI_frequency.text()),
-                'data_buf': data_buf,
-                'rx_size': 0,
-                'bus_num': int(self.lineEdit_SPI_bus_num.text()),
-            }
+            for key, value in self.cond.test_info['Msg'].items():
+                try:
+                    self.cond.test_info['Msg'][key] = int(value)
+                except:
+                    pass
             self.cond = flow.SPI_write(self.cond)
+            data_buf_string = ''
+            try:
+                reg_data = self.reg_inversion(self.cond.measurement_info['Msg'])
+            except:
+                self.lineEdit_SPI_DI.setText(data_buf_string)
+                return
+            data_buf = Reg_Operation.dec_to_hex(reg_data)
+            for data in data_buf:
+                data_buf_string = data_buf_string + data + ','
+            self.lineEdit_SPI_DI.setText(data_buf_string)
 
     def read_mcu(self, flow):
         """
@@ -218,32 +231,37 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             self.cond = flow.Reset(self.cond)
 
         elif re.search('SPI', name, re.I) is not None:  # SPI
-            data_buf = Reg_Operation.hex_to_dec(
-                self.lineEdit_SPI_reg_address.text()
-            )
-            self.cond.test_info['Msg'] = {
-                'cfg': int(self.lineEdit_SPI_config.text()),
-                'fstb': int(self.lineEdit_SPI_first_bit.text()),
-                'cpol': int(self.lineEdit_SPI_CPOL.text()),
-                'cpha': int(self.lineEdit_SPI_CHPA.text()),
-                'size': int(self.lineEdit_SPI_data_size.text()),
-                'cspol': int(self.lineEdit_SPI_CSPOL.text()),
-                'freq': int(self.lineEdit_SPI_frequency.text()),
-                'data_buf': data_buf,
-                'rx_size': int(self.lineEdit_SPI_reg_number.text()),
-                'bus_num': int(self.lineEdit_SPI_bus_num.text()),
-            }
+            data_buf = self.reg_inversion(Reg_Operation.hex_to_dec(
+                self.lineEdit_SPI_DO.text()
+            ))
+            self.cond.test_info['Msg'] = (refresh_SPI(
+                bus_num=self.lineEdit_SPI_bus_num.text(),
+                cfg=self.lineEdit_SPI_config.text(),
+                cpol=self.lineEdit_SPI_CPOL.text(),
+                cpha=self.lineEdit_SPI_CHPA.text(),
+                fstb=self.lineEdit_SPI_first_bit.text(),
+                size=self.lineEdit_SPI_data_size.text(),
+                frequency=self.lineEdit_SPI_frequency.text(),
+                data_buf=data_buf,
+                rx_size=len(data_buf),
+            )).copy()
+
+            for key, value in self.cond.test_info['Msg'].items():
+                try:
+                    self.cond.test_info['Msg'][key] = int(value)
+                except:
+                    pass
             self.cond = flow.SPI_read(self.cond)
             data_buf_string = ''
             try:
                 reg_data = self.reg_inversion(self.cond.measurement_info['Msg'])
             except:
-                self.lineEdit_SPI_reg_value.setText(data_buf_string)
+                self.lineEdit_SPI_DI.setText(data_buf_string)
                 return
             data_buf = Reg_Operation.dec_to_hex(reg_data)
             for data in data_buf:
                 data_buf_string = data_buf_string + data + ','
-            self.lineEdit_SPI_reg_value.setText(data_buf_string)
+            self.lineEdit_SPI_DI.setText(data_buf_string)
 
     def reg_inversion(self, reg_list: list):
 
@@ -251,3 +269,38 @@ class MCUwindow_Control(QWidget, Ui_ui_mcuwindow):
             reg_list.reverse()
 
         return reg_list
+
+def refresh_SPI(data_buf=[], cfg=0, cpol=0, cpha=0, fstb=1, size=1, cspol=0, rx_size=0, frequency=5, bus_num=1):
+    """
+    Refresh SPI command, which will be sent to mcu.
+
+    Args:
+        data_buf: List of register address and data, format: list, e.g. [0x00, 0x01].
+        rx_size: Length of register data user wants to get, format: int.
+        cfg: SPI setting configuration, 0=not set/ 1=set, format: int.
+        cpol: SPI polarity configuration, 0=low/ 1=high, format: int.
+        cpha: SPI phase configuration, 0=first edge/ 1=second edge, format: int.
+        fstb: SPI data transforming configuration, 0=LSB/ 1=MSB, format: int.
+        size: SPI data size configuration, 0=8bit/ 1=16bit, format:int.
+        cspol: SPI effective CS configuration, 0=low level is effective/ 1=high level is effective, format: int.
+        frequency: SPI transmission rate, 0=24M/ 1=12/ 2=6M/ 3=3M/ 4=1.5M/ 5=750K/ 6=375K/ 7=187.5K, format: int.
+        bus_num: SPI pin at mcu, default is 1, format: int.
+
+    Returns:
+        msg: Group of SPI command which will be sent to mcu, format: dict.
+    """
+    """Need to set data_buf, rx_size"""
+    msg = {
+        'data_buf': data_buf,
+        'bus_num': bus_num,
+        'cfg': cfg,
+        'cpol': cpol,
+        'cpha': cpha,
+        'fstb': fstb,
+        'size': size,
+        'cspol': cspol,
+        'rx_size': rx_size,
+        "freq": frequency,
+    }
+
+    return msg

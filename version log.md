@@ -203,3 +203,7 @@
 - 1.Modify Jupiter parse error
 - 2.Add plot_noise function in tool_plot.py
 - 3.Update parameters in plot_linearity and plot_best_fit.
+
+### 20240619-Modify SPI communicaiton error
+- 1.Modify SPI write/read error.
+- 2.Optimize SPI UI interface.

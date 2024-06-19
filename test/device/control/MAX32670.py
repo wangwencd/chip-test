@@ -197,7 +197,6 @@ class MAX32670(object):
         self.parse_result(msg, 6)
 
         return proto_info
-
     def read_SPI(self, msg):
         msg.update({'proto_type': 'SPI_Proto'})
         proto_info = self.com_transimit_read(**msg)
