@@ -207,3 +207,9 @@
 ### 20240619-Modify SPI communicaiton error
 - 1.Modify SPI write/read error.
 - 2.Optimize SPI UI interface.
+
+### 20240619-Add saving data function in custom test
+- 1.Add saving data function in custom test
+- 2.Add saving string csv file in result_output
+- 3.Modify E36312A measure function
+- 4.Add DP932U instrument control code.

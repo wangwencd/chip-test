@@ -31,18 +31,13 @@ class CH341A(object):
         """
         i2c_address = kwargs.get('i2c_address')
         data_buf = kwargs.get('data_buf')
-        iIndex = 0
-        iReadLength = 0
-        if 'bus_num' in kwargs:
-            iIndex = kwargs.get('bus_num')
-        if 'rx_size' in kwargs:
-            iReadLength = kwargs.get('rx_size')
+        iIndex = kwargs.get('bus_num', 0)
+        iReadLength = kwargs.get('rx_size', 0)
         iWriteLength = len([i2c_address] + data_buf)
         iWriteBuffer = (c_byte * iWriteLength)()
         oReadBuffer = (c_byte * iReadLength)()
         iWriteBuffer[0] = (i2c_address << 1)
-        for i in range(iWriteLength - 1):
-            iWriteBuffer[i + 1] = data_buf[i]
+        iWriteBuffer[1:iWriteLength] = data_buf[:iWriteLength - 1]
         self.control.instrument.CH341StreamI2C(iIndex, iWriteLength, iWriteBuffer, iReadLength, oReadBuffer)
         result_list = [value & 0xff for value in list(oReadBuffer)]
         return result_list
@@ -54,13 +49,9 @@ class CH341A(object):
         Args:
             **kwargs: Message dict
         """
-        bus_num = int(kwargs['bus_num'])
-        imode = 1
-
-        if 'frequency' in kwargs:
-            for key, value in I2C_frequency.items():
-                if kwargs.get('frequency') == key:
-                    imode = value
+        bus_num = kwargs.get('bus_num', 0)
+        frequency = kwargs.get('frequency', 1)
+        imode = I2C_frequency[frequency]
         self.control.instrument.CH341SetStream(bus_num, imode)
 
     def write_I2C(self, msg):
@@ -103,9 +94,7 @@ class CH341A(object):
         Args:
             kwargs: Message dict
         """
-        iIndex = 0
-        if 'bus_num' in kwargs:
-            iIndex = kwargs.get('bus_num')
+        iIndex = kwargs.get('bus_num', 0)
         self.control.instrument.CH341ResetDevice(iIndex)
 
         self.parse_result(kwargs, 5)
@@ -121,22 +110,11 @@ class CH341A(object):
             in_buf: SPI return message
         """
         data_buf = kwargs.get('data_buf')
-        iIndex = 0
-        in_length = 0
-        iChipSelect = 128
-        if 'bus_num' in kwargs:
-            iIndex = kwargs.get('bus_num')
-        if 'rx_size' in kwargs:
-            in_length = kwargs.get('rx_size')
-        if 'cpol' in kwargs:
-            for key, value in SPI_CS.items():
-                if kwargs.get('cpol') == key:
-                    iChipSelect = value
-        out_length = len(data_buf)
-        iLength = max(in_length, out_length)
-        ioBuffer = (c_byte * iLength)()
-        for i in range(out_length):
-            ioBuffer[i] = data_buf[i]
+        iIndex = kwargs.get('bus_num', 0)
+        cpol = kwargs.get('cpol', 0)
+        iChipSelect = SPI_CS[cpol]
+        iLength = len(data_buf)
+        ioBuffer = (c_byte * iLength)(*data_buf)
         self.control.instrument.CH341StreamSPI4(iIndex, iChipSelect, iLength, ioBuffer)
         result_list = [value & 0xff for value in list(ioBuffer)]
         return result_list
@@ -209,19 +187,18 @@ class CH341A(object):
                 parse_result = Reg_Operation.dec_to_hex(msg)
                 L.info(self.name + ' read value: ' + str(parse_result))
 
-
 I2C_frequency = {
     'frequency': 'imode',
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 3,
-    5: 0,
+    1: 1,  # 100kHz
+    2: 2,  # 400kHz
+    3: 3,  # 750kHz
+    4: 3,  # 750kHz
+    5: 0,  # 20kHz
 }
 
 SPI_CS = {
     'CS ID': 'iChipSelect',
-    0: 128,
-    1: 129,
-    2: 130,
+    0: 128,  # D0 selected
+    1: 129,  # D1 selected
+    2: 130,  # D2 selected
 }
