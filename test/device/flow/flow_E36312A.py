@@ -72,7 +72,10 @@ class Flow_E36312A(E36312A):
         Returns:
             condition: Condition information summary
         """
-        channel = str(condition.measurement_info['Channel'])
+        try:
+            channel = str(condition.measurement_info['Channel'])
+        except:
+            channel = str(condition.test_info['Channel'])
 
         if channel == '1' or channel == '2' or channel == '3':
             voltage, current = self.query_channel_all(channel)

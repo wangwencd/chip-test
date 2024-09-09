@@ -5,6 +5,8 @@ Version: 3.8
 Date: 2022/8/22 9:53
 File: test_custom_test.py
 """
+import re
+import numpy as np
 import time
 import logging
 from test.device.flow.control_flow import Control_Flow
@@ -35,6 +37,9 @@ class Test_Custom_Test(Control_Flow):
 
         if function_key == 'nan':  # Function is empty
             return condition
+
+        elif re.search('save', function_key, re.I) is not None:  # Function is saving data
+            condition = self.exec_save(condition)
 
         elif function_value is None:  # Function has no function name
             condition = eval('self.' + function_key)(condition)  # run single function without function name
@@ -86,6 +91,31 @@ class Test_Custom_Test(Control_Flow):
                 break
 
         condition.test_flag = False
+        return condition
+    def exec_save(self, condition):
+        """
+        Save test_info or measurement_info data to output_info
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        name = condition.test_info['Info'] + '_' + condition.test_info['Key']
+        if name not in condition.output_info:  # Key not in output_info
+            condition.output_info[name] = np.array([])  # Create empty array for Key
+
+        if condition.test_info['Key'] is dict:  # Key is a dict
+            condition.output_info[name] = np.append(
+                condition.output_info[name],
+                str(eval('condition.'+condition.test_info['Info'])[condition.test_info['Key']][condition.test_info['Item']])
+            )
+        else:  # Key is not a dict
+            condition.output_info[name] = np.append(
+                condition.output_info[name],
+                str(eval('condition.' + condition.test_info['Info'])[condition.test_info['Key']])
+            )
         return condition
 
     def measure_VI_thread(self, condition):

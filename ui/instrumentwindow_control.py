@@ -1275,3 +1275,82 @@ class Instrumentwindow_Control(QWidget, Ui_ui_instrumentwindow):
                 )
                 L.info(str(result))
 
+    def set_DP932U(self, flow):
+        """
+        Operate DP932U instrument, according to instrument window ui
+
+        Args:
+            flow: Class of DP832 control
+        """
+        name = self.tabWidget_DP932U.currentWidget().objectName()  # Return specific function of instrument
+
+        """channel_option"""
+        if re.search('channel_option', name, re.I) is not None:
+
+            if re.search('ON', self.comboBox_DP932U_channel_option_switch.currentText(), re.I) is not None:
+                # Channel on
+                flow.channel_on(
+                    self.comboBox_DP932U_channel_option_channel.currentText()  # Channel number
+                )
+
+            elif re.search('OFF', self.comboBox_DP932U_channel_option_switch.currentText(), re.I) is not None:
+                # Channel off
+                flow.channel_off(
+                    self.comboBox_DP932U_channel_option_channel.currentText()  # Channel number
+                )
+
+        """enable_remote"""
+        if re.search('enable_remote', name, re.I) is not None:
+            flow.enable_remote()
+
+        """query_parameter"""
+        if re.search('query_parameter', name, re.I) is not None:
+            flow.query_channel_all(
+                    self.comboBox_DP932U_query_parameter_channel.currentText()  # Channel number
+            )
+
+        """set_parameter"""
+        if re.search('set_parameter', name, re.I) is not None:
+            flow.set_channel_voltage_current(
+                self.lineEdit_DP932U_set_parameter_voltage.text(),  # Voltage value
+                self.lineEdit_DP932U_set_parameter_current.text(),  # Current value
+                self.comboBox_DP932U_set_parameter_channel.currentText()  # Channel number
+            )
+
+        """set_voltage"""
+        if re.search('set_voltage', name, re.I) is not None:
+            flow.set_channel_voltage(
+                self.lineEdit_DP932U_set_voltage_voltage.text(),  # Voltage value
+                self.comboBox_DP932U_set_voltage_channel.currentText()  # Channel number
+            )
+
+        """set_current"""
+        if re.search('set_current', name, re.I) is not None:
+            flow.set_channel_current(
+                self.lineEdit_DP932U_set_current_current.text(),  # Current value
+                self.comboBox_DP932U_set_current_channel.currentText()  # Channel number
+            )
+
+        """self_defined"""
+        if re.search('self_defined', name, re.I) is not None:
+
+            if self.lineEdit_DP932U_self_defined_query.text() != '':
+                # Query
+                result = flow.control.query(
+                    self.lineEdit_DP932U_self_defined_query.text()  # Query command
+                )
+                L.info(str(result))
+
+            if self.lineEdit_DP932U_self_defined_write.text() != '':
+                # Write
+                flow.control.write(
+                    self.lineEdit_DP932U_self_defined_write.text()  # Write command
+                )
+
+            if self.lineEdit_DP932U_self_defined_read.text() != '':
+                # Read
+                result = flow.control.read(
+                    self.lineEdit_DP932U_self_defined_read.text()  # Read command
+                )
+                L.info(str(result))
+

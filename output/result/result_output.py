@@ -73,6 +73,62 @@ class Result_Output:
         """"""
 
     @staticmethod
+    def to_str_csv(data, path=None, name=None, header=''):
+        """
+        Output result data into a string csv file
+
+        Args:
+            data: Data info
+            path: Saving path, project path would be used if path don't exist
+            header: Header info, using to generate column name
+        """
+        fmt = '%s'
+        if name is None:
+            current_time = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())  # Get current time
+
+            if path == None: # If there is no path
+                np.savetxt(
+                    os.getcwd() + '/' + current_time + '.csv',
+                    data,
+                    fmt=fmt,
+                    delimiter=',',
+                    header=header,
+                    comments=''
+                )
+
+            else: # If there is a path
+                np.savetxt(
+                    path + '/' + current_time + '.csv',
+                    data,
+                    fmt=fmt,
+                    delimiter=',',
+                    header=header,
+                    comments=''
+                )
+
+        else:
+
+            if path == None: # If there is no path
+                np.savetxt(
+                    os.getcwd() + '/' + name + '.csv',
+                    data,
+                    fmt=fmt,
+                    delimiter=',',
+                    header=header,
+                    comments=''
+                )
+
+            else: # If there is a path
+                np.savetxt(
+                    path + '/' + name + '.csv',
+                    data,
+                    fmt=fmt,
+                    delimiter=',',
+                    header=header,
+                    comments=''
+                )
+
+    @staticmethod
     def to_png(plt, path, name=None):
         if name is None:
             current_time = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())  # Get current time

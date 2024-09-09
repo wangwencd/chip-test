@@ -7,7 +7,6 @@ File: MAX32670.py
 """
 import logging
 import time
-import asyncio
 
 from parse.multiprocess.pool_thread import pool
 from parse.file.reg_operation import Reg_Operation
@@ -153,9 +152,8 @@ class MAX32670(object):
     def receive_msg(self):
         self.control.instrument.flushInput()
 
-        t1 = time.time()
-        t2 = time.time()
-        while t2 - t1 < 0.1:
+        start_time = time.time()
+        while True:
             try:
                 rx_buf = ''
                 rx_buf = self.control.instrument.read()  # 转化为整型数字
@@ -172,11 +170,9 @@ class MAX32670(object):
             except:
                 pass
 
-            finally:
-                t2 = time.time()
-
-        L.warning(self.name + ' get info fail!')
-        return
+            if time.time() - start_time > 0.05:
+                L.warning(self.name + ' get info fail!')
+                return -1
 
     def com_transimit_read(self, **kwargs):
         self.control.instrument.flushInput()

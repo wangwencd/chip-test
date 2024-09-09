@@ -294,7 +294,7 @@ class Ui_ui_MainWindow(object):
 
     def retranslateUi(self, ui_MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        ui_MainWindow.setWindowTitle(_translate("ui_MainWindow", "Transepic_AutoTest_V2.07.00 "))
+        ui_MainWindow.setWindowTitle(_translate("ui_MainWindow", "Transepic_AutoTest_V2.08.00 "))
         self.groupBox.setTitle(_translate("ui_MainWindow", "Function"))
         self.radioButton_battery_lab.setText(_translate("ui_MainWindow", "Battery lab"))
         self.toolBox_function.setItemText(self.toolBox_function.indexOf(self.page_battery_lab), _translate("ui_MainWindow", "Battery lab"))

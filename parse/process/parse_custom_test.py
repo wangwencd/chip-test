@@ -588,7 +588,7 @@ class Parse_Custom_Test:
         """
         if isinstance(parameter, list):  # Format: [A]
 
-            if parameter == []:
+            if parameter is []:
                 parameter = np.nan  # To format: np.nan
 
             else:
