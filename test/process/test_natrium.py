@@ -468,12 +468,12 @@ class Test_Natrium(Control_Flow):
                             continue
 
                         elif len(condition.measurement_info['Msg']) >= 1:
-                            del condition.measurement_info['Msg'][0]
-                            del condition.measurement_info['Msg'][-1]
+                            # del condition.measurement_info['Msg'][0]
+                            # del condition.measurement_info['Msg'][-1]
                             condition.measurement_info['Msg'].reverse()
                             result = Reg_Operation.dec_to_one(condition.measurement_info['Msg'])
-                            if result >= 32768:
-                                result = result - 65536
+                            # if result >= 32768:
+                            #     result = result - 65536
                             data[j].append(result)
                             break
 
@@ -638,9 +638,9 @@ class Test_Natrium(Control_Flow):
 
                 condition.measurement_info['Set_Voltage'] = set_voltage_1
                 condition = self.measure_multi(condition)
-                set_voltage_1 = round(set_voltage_1 + step_voltage, 6)
-                set_voltage_2 = round(set_voltage_2 - step_voltage, 6)
-                start_voltage = round(start_voltage + step_voltage, 6)
+                set_voltage_1 = round(set_voltage_1 + step_voltage, 8)
+                set_voltage_2 = round(set_voltage_2 - step_voltage, 8)
+                start_voltage = round(start_voltage + step_voltage, 8)
 
             """Close ADC instrument"""
             if condition.test_info['ADC_Setting_Flag'] is True:
