@@ -476,7 +476,7 @@ class ToolPlot(object):
         t1 = time.time()
         msb = 32768  # Data convert param, format: int or None
         lsb = None  # Data convert param, format: int or None
-        LSB = 0.0000625  # ADC LSB, unit: uV
+        LSB = 0.000043  # ADC LSB, unit: uV
         inl_fitting_flag = True  # Flag of INL fitting
         file = pd.read_csv(config_path)
         original_code = np.array(file.iloc[:, 4], dtype=np.int32)
@@ -1053,7 +1053,7 @@ if __name__ == '__main__':
     from test.condition.condition import Condition
     condition = Condition()
 
-    path = r'C:\Users\ww\Desktop\jupiter\INL\1'
+    path = r'C:\Users\ww\Desktop\2'
 
     condition.config_path = path
     condition.tool_func = 'plot_best_fit'

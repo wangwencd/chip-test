@@ -183,6 +183,11 @@ class Flow_KEITHLEY2450(KEITHLEY2450):
 
         return condition
 
+    def enter_cv(self, condition):
+        self.enter_CV_mode()
+
+        return condition
+
     def set_cc_parameter(self, condition):
         current = condition.test_info['Current']
         voltage = condition.test_info['Voltage']

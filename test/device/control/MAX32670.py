@@ -172,14 +172,16 @@ class MAX32670(object):
 
             if time.time() - start_time > 0.05:
                 L.warning(self.name + ' get info fail!')
-                return -1
+                return []
 
     def com_transimit_read(self, **kwargs):
         self.control.instrument.flushInput()
         future_msg = pool.submit(self.receive_msg)
         self.pack_and_send_mesg(**kwargs)
         proto_info = future_msg.result()
-        # print(task.result())
+        # print(proto_info)
+        # if proto_info == -1:  # Receive error
+        #     proto_info = self.com_transimit_read(**kwargs)
         return proto_info
 
     def com_transimit_write(self, **kwargs):

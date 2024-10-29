@@ -16,5 +16,5 @@ class DP932U(DP832):
     """
     def __init__(self, cls):
         self.control = cls
-        self.name = 'DP932U'
         super(DP832).__init__()
+        self.name = 'DP932U'

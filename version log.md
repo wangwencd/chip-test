@@ -213,3 +213,8 @@
 - 2.Add saving string csv file in result_output
 - 3.Modify E36312A measure function
 - 4.Add DP932U instrument control code.
+
+### 20241029-Update user guide
+- 1.Add saving data function description in Autotest user guide
+- 2.Modify a MCU communication error
+- 3.Modify some functions of instruments.
