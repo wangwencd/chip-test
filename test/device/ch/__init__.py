@@ -6,21 +6,25 @@ Date: 2024/3/26 13:58
 File: __init__.py.py
 """
 from test.device.flow.flow_CH341A import Flow_CH341A
+from test.device.flow.flow_CH347 import Flow_CH347
 
 Instrument_Dll = {
     'Device name': 'Device dll name',
     'CH341A': 'CH341DLLA64.DLL',
+    'CH347': 'CH347DLLA64.DLL',
 }
 
 Instrument_Function = {
     'Device name': 'Device function name',
     'CH341A': ['CH341OpenDevice', 'CH341CloseDevice'],
+    'CH347': ['CH347OpenDevice', 'CH347CloseDevice'],
 }
 
 
 Instrument_Class = {
     'Device name': 'Device class',
     'CH341A': Flow_CH341A,
+    'CH347': Flow_CH347,
 }
 
 def determine_instrument(instrument_name: str):

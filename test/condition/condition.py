@@ -38,11 +38,11 @@ class Condition(object):
 
         """Output information summary"""
         self.output_info = {
-            # 'TTime': np.array([]),
-            # 'Temperature': np.array([]),
-            # 'VITime': np.array([]),
-            # 'Voltage': np.array([]),
-            # 'Current': np.array([]),
+            'TTime': np.array([]),
+            'Temperature': np.array([]),
+            'VITime': np.array([]),
+            'Voltage': np.array([]),
+            'Current': np.array([]),
         }
 
         """Flag"""
