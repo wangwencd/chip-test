@@ -8,6 +8,7 @@ File: test_battery_lab.py
 
 import time
 import logging
+import threading
 import numpy as np
 from test.device.flow.control_flow import Control_Flow
 from parse.multiprocess.pool_thread import pool
@@ -134,7 +135,7 @@ class Test_Battery_Lab(Control_Flow):
         condition.test_info['Voltage'] = condition.test_info['Charge_Voltage']
         condition.test_info['Current'] = condition.test_info['Charge_Current']
         condition = self.open(condition)
-        condition = self.prepare(condition)
+        # condition = self.prepare(condition)
         condition = self.set(condition)
         condition = self.on(condition)
         L.info('Init charge finished')
@@ -521,187 +522,200 @@ class Test_Battery_Lab(Control_Flow):
         """
         try:
             """Init temperature setting instrument"""
-            condition = self.init_temperature_setting(condition)
+            if condition.test_info['Temperature_Setting_Flag'] is True:
+                condition = self.init_temperature_setting(condition)
 
             """Init temperature measurement instrument"""
-            condition = self.init_temperature_measurement(condition)
+            if condition.test_info['Temperature_Measurement_Flag'] is True:
+                condition = self.init_temperature_measurement(condition)
 
-            """Begin temperature measurement"""
-            condition = self.begin_T_measurement(condition)
-            time.sleep(1)
-
-            """Judge whether temperature is stable"""
-            condition = self.temperature_judgement(condition)
-
-            """Init battery charge instrument"""
-            condition = self.init_charge(condition)
-            condition.current_flag = 1
-            time.sleep(1)
-
-            """Begin voltage measurement"""
-            condition = self.begin_VI_measurement(condition)
-
-            """Judge whether charge is enough"""
-            condition = self.charge_judgement(condition)
-
-            """Stop charge"""
-            condition = self.stop_charge(condition)
-            condition.current_flag = 2
+                """Begin temperature measurement"""
+                condition = self.begin_T_measurement(condition)
+                time.sleep(1)
 
             """Judge whether temperature is stable"""
-            condition = self.temperature_judgement(condition)
+            if condition.test_info['Temperature_Measurement_Flag'] is True:
+                condition = self.temperature_judgement(condition)
 
-            """Judge whether relaxing is enough"""
-            condition = self.relax_judgement(condition)
-            flag = 1
+            if condition.test_info['Charge_Setting_Flag'] is True:
+                """Init battery charge instrument"""
+                condition = self.init_charge(condition)
+                condition.current_flag = 1
+                time.sleep(1)
 
-            while True:
+                """Begin voltage measurement"""
+                condition = self.begin_VI_measurement(condition)
 
-                if flag == 1:
-                    L.info('Enter branch 1')
-                    """Begin discharge"""
-                    condition.test_info['Discharge_Current'] = condition.test_info['Discharge_Current_1']
-                    condition = self.begin_discharge(condition)
-                    """Judge whether discharge is enough"""
-                    condition.test_info['Discharge_Voltage_Threshold'] \
-                        = condition.test_info['Discharge_Voltage_Threshold_1']
-                    condition = self.discharge_judgement(condition)
-                    """Calculate average of voltage"""
-                    condition = self.cal_voltage(condition)
+                """Judge whether charge is enough"""
+                condition = self.charge_judgement(condition)
 
-                    """Judge next step"""
-                    flag = 2 if condition.measurement_info['Ave_Voltage'] \
-                                < float(condition.test_info['Voltage_Judgement_1']) else 3
+                """Stop charge"""
+                condition = self.stop_charge(condition)
+                condition.current_flag = 2
 
-                if flag == 2:
-                    L.info('Enter branch 2')
-                    """Judge whether relaxing is enough"""
-                    condition = self.relax_judgement(condition)
-                    """Calculate average of voltage"""
-                    condition = self.cal_voltage(condition)
+            if condition.test_info['Temperature_Measurement_Flag'] is True:
+                """Judge whether temperature is stable"""
+                condition = self.temperature_judgement(condition)
 
-                    """Judge next step"""
-                    flag = 1 if condition.measurement_info['Ave_Voltage'] \
-                                >= float(condition.test_info['Voltage_Judgement_2']) else 4
+            if condition.test_info['Charge_Setting_Flag'] is True:
+                """Judge whether relaxing is enough"""
+                condition = self.relax_judgement(condition)
+                flag = 1
 
-                if flag == 3:
-                    L.info('Enter branch 3')
-                    """Judge whether relaxing is enough"""
-                    condition = self.relax_judgement(condition)
-                    """Calculate average of voltage"""
-                    condition = self.cal_voltage(condition)
+                while True:
 
-                    """Judge next step"""
-                    flag = 4 if condition.measurement_info['Ave_Voltage'] \
-                                < float(condition.test_info['Voltage_Judgement_3']) else 1
+                    if flag == 1:
+                        L.info('Enter branch 1')
+                        """Begin discharge"""
+                        condition.test_info['Discharge_Current'] = condition.test_info['Discharge_Current_1']
+                        condition = self.begin_discharge(condition)
+                        """Judge whether discharge is enough"""
+                        condition.test_info['Discharge_Voltage_Threshold'] \
+                            = condition.test_info['Discharge_Voltage_Threshold_1']
+                        condition = self.discharge_judgement(condition)
+                        """Calculate average of voltage"""
+                        condition = self.cal_voltage(condition)
 
-                if flag == 4:
-                    L.info('Enter branch 4')
-                    """Begin discharge"""
-                    condition.test_info['Discharge_Current'] = condition.test_info['Discharge_Current_2']
-                    condition = self.begin_discharge(condition)
-                    """Judge whether discharge is enough"""
-                    condition.test_info['Discharge_Voltage_Threshold'] = \
-                        condition.test_info['Discharge_Voltage_Threshold_2']
-                    condition = self.discharge_judgement(condition)
-                    """Calculate average of voltage"""
-                    condition = self.cal_voltage(condition)
+                        """Judge next step"""
+                        flag = 2 if condition.measurement_info['Ave_Voltage'] \
+                                    < float(condition.test_info['Voltage_Judgement_1']) else 3
 
-                    """Judge next step"""
-                    flag = 5 if condition.measurement_info['Ave_Voltage'] \
-                                < float(condition.test_info['Voltage_Judgement_4']) else 6
+                    if flag == 2:
+                        L.info('Enter branch 2')
+                        """Judge whether relaxing is enough"""
+                        condition = self.relax_judgement(condition)
+                        """Calculate average of voltage"""
+                        condition = self.cal_voltage(condition)
 
-                if flag == 5:
-                    L.info('Enter branch 5')
-                    """Judge whether relaxing is enough"""
-                    condition = self.relax_judgement(condition)
-                    """Calculate average of voltage"""
-                    condition = self.cal_voltage(condition)
+                        """Judge next step"""
+                        flag = 1 if condition.measurement_info['Ave_Voltage'] \
+                                    >= float(condition.test_info['Voltage_Judgement_2']) else 4
 
-                    """Judge next step"""
-                    flag = 7 if condition.measurement_info['Ave_Voltage'] \
-                                < float(condition.test_info['Voltage_Judgement_5']) else 4
+                    if flag == 3:
+                        L.info('Enter branch 3')
+                        """Judge whether relaxing is enough"""
+                        condition = self.relax_judgement(condition)
+                        """Calculate average of voltage"""
+                        condition = self.cal_voltage(condition)
 
-                if flag == 6:
-                    L.info('Enter branch 6')
-                    """Judge whether relaxing is enough"""
-                    condition = self.relax_judgement(condition)
-                    """Calculate average of voltage"""
-                    condition = self.cal_voltage(condition)
+                        """Judge next step"""
+                        flag = 4 if condition.measurement_info['Ave_Voltage'] \
+                                    < float(condition.test_info['Voltage_Judgement_3']) else 1
 
-                    """Judge next step"""
-                    flag = 7 if condition.measurement_info['Ave_Voltage'] \
-                                < float(condition.test_info['Voltage_Judgement_6']) else 4
+                    if flag == 4:
+                        L.info('Enter branch 4')
+                        """Begin discharge"""
+                        condition.test_info['Discharge_Current'] = condition.test_info['Discharge_Current_2']
+                        condition = self.begin_discharge(condition)
+                        """Judge whether discharge is enough"""
+                        condition.test_info['Discharge_Voltage_Threshold'] = \
+                            condition.test_info['Discharge_Voltage_Threshold_2']
+                        condition = self.discharge_judgement(condition)
+                        """Calculate average of voltage"""
+                        condition = self.cal_voltage(condition)
 
-                if flag == 7:
-                    L.info('Enter branch 7')
-                    """Begin discharge"""
-                    condition.test_info['Discharge_Current'] = condition.test_info['Discharge_Current_3']
-                    condition = self.begin_discharge(condition)
-                    """Judge whether discharge is enough"""
-                    condition.test_info['Discharge_Voltage_Threshold'] = \
-                        condition.test_info['Discharge_Voltage_Threshold_3']
-                    condition = self.discharge_judgement(condition)
-                    """Judge whether relaxing is enough"""
-                    condition = self.relax_judgement(condition)
-                    """Calculate average of voltage"""
-                    condition = self.cal_voltage(condition)
+                        """Judge next step"""
+                        flag = 5 if condition.measurement_info['Ave_Voltage'] \
+                                    < float(condition.test_info['Voltage_Judgement_4']) else 6
 
-                    """Judge next step"""
-                    flag = 8 if condition.measurement_info['Ave_Voltage'] \
-                                < float(condition.test_info['Voltage_Judgement_7']) else 7
+                    if flag == 5:
+                        L.info('Enter branch 5')
+                        """Judge whether relaxing is enough"""
+                        condition = self.relax_judgement(condition)
+                        """Calculate average of voltage"""
+                        condition = self.cal_voltage(condition)
 
-                if flag == 8:
-                    L.info('Enter branch 8')
-                    """Finally step"""
-                    break
+                        """Judge next step"""
+                        flag = 7 if condition.measurement_info['Ave_Voltage'] \
+                                    < float(condition.test_info['Voltage_Judgement_5']) else 4
 
-            condition.test_VI_flag = False  # Stop charge measurement
-            time.sleep(1)
-            """Close charge instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Charge_Instrument']
-            condition = self.off(condition)
-            """Close temperature setting instrument"""
-            condition = self.stop_temperature_setting(condition)
-            """Close temperature measurement instrument"""
-            condition.test_T_flag = False  # Stop charge measurement
-            time.sleep(1)
-            condition.test_info['Instrument'] = condition.test_info['Temperature_Measurement_Instrument']
-            condition = self.off(condition)
+                    if flag == 6:
+                        L.info('Enter branch 6')
+                        """Judge whether relaxing is enough"""
+                        condition = self.relax_judgement(condition)
+                        """Calculate average of voltage"""
+                        condition = self.cal_voltage(condition)
+
+                        """Judge next step"""
+                        flag = 7 if condition.measurement_info['Ave_Voltage'] \
+                                    < float(condition.test_info['Voltage_Judgement_6']) else 4
+
+                    if flag == 7:
+                        L.info('Enter branch 7')
+                        """Begin discharge"""
+                        condition.test_info['Discharge_Current'] = condition.test_info['Discharge_Current_3']
+                        condition = self.begin_discharge(condition)
+                        """Judge whether discharge is enough"""
+                        condition.test_info['Discharge_Voltage_Threshold'] = \
+                            condition.test_info['Discharge_Voltage_Threshold_3']
+                        condition = self.discharge_judgement(condition)
+                        """Judge whether relaxing is enough"""
+                        condition = self.relax_judgement(condition)
+                        """Calculate average of voltage"""
+                        condition = self.cal_voltage(condition)
+
+                        """Judge next step"""
+                        flag = 8 if condition.measurement_info['Ave_Voltage'] \
+                                    < float(condition.test_info['Voltage_Judgement_7']) else 7
+
+                    if flag == 8:
+                        L.info('Enter branch 8')
+                        """Finally step"""
+                        break
+
+                condition.test_VI_flag = False  # Stop charge measurement
+                time.sleep(1)
+            if condition.test_info['Charge_Setting_Flag'] is True:
+                """Close charge instrument"""
+                condition.test_info['Instrument'] = condition.test_info['Charge_Instrument']
+                condition = self.off(condition)
+            if condition.test_info['Temperature_Setting_Flag'] is True:
+                """Close temperature setting instrument"""
+                condition = self.stop_temperature_setting(condition)
+                """Close temperature measurement instrument"""
+                condition.test_T_flag = False  # Stop charge measurement
+                time.sleep(1)
+            if condition.test_info['Temperature_Measurement_Flag'] is True:
+                condition.test_info['Instrument'] = condition.test_info['Temperature_Measurement_Instrument']
+                condition = self.off(condition)
             L.debug('Finish normal flow')
 
         except:
+
             condition.test_VI_flag = False  # Stop measurement
             time.sleep(1)
-            """Close charge instrument"""
-            condition.test_info['Instrument'] = condition.test_info['Charge_Instrument']
-            condition.test_info['Communication'] = condition.test_info['Charge_Communication']
 
-            try:
-                condition = self.open(condition)
-            except:
-                pass
-            condition = self.off(condition)
-            """Close temperature setting instrument"""
-            condition.test_info['Instrument'] \
-                = condition.test_info['Temperature_Setting_Instrument']  # Temperature instrument name
+            if condition.test_info['Charge_Setting_Flag'] is True:
+                """Close charge instrument"""
+                condition.test_info['Instrument'] = condition.test_info['Charge_Instrument']
+                condition.test_info['Communication'] = condition.test_info['Charge_Communication']
+                try:
+                    condition = self.open(condition)
+                except:
+                    pass
+                condition = self.off(condition)
+            if condition.test_info['Temperature_Setting_Flag'] is True:
+                """Close temperature setting instrument"""
+                condition.test_info['Instrument'] \
+                    = condition.test_info['Temperature_Setting_Instrument']  # Temperature instrument name
 
-            try:
-                condition = self.open(condition)
-            except:
-                pass
-            condition = self.stop_temperature_setting(condition)
-            """Close temperature measurement instrument"""
-            condition.test_T_flag = False  # Stop charge measurement
-            time.sleep(1)
-            condition.test_info['Instrument'] = condition.test_info['Temperature_Measurement_Instrument']
-            condition.test_info['Communication'] = condition.test_info['Temperature_Measurement_Communication']
+                try:
+                    condition = self.open(condition)
+                except:
+                    pass
+                condition = self.stop_temperature_setting(condition)
+            if condition.test_info['Temperature_Measurement_Flag'] is True:
+                """Close temperature measurement instrument"""
+                condition.test_T_flag = False  # Stop charge measurement
+                time.sleep(1)
+                condition.test_info['Instrument'] = condition.test_info['Temperature_Measurement_Instrument']
+                condition.test_info['Communication'] = condition.test_info['Temperature_Measurement_Communication']
 
-            try:
-                condition = self.open(condition)
-            except:
-                pass
-            condition = self.off(condition)
+                try:
+                    condition = self.open(condition)
+                except:
+                    pass
+                condition = self.off(condition)
             L.debug('Finish except flow')
 
         finally:

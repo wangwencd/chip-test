@@ -54,4 +54,19 @@ class Parse_battery_Lab:
         condition.test_info['Discharge_Current_2'] = float(condition.test_info['Discharge_Current_2']) / 1000
         condition.test_info['Discharge_Current_3'] = float(condition.test_info['Discharge_Current_3']) / 1000
 
+        if 'Temperature_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Temperature_Setting_Flag'] = bool(int(condition.test_info['Temperature_Setting_Flag']))
+        else:
+            condition.test_info['Temperature_Setting_Flag'] = True
+
+        if 'Temperature_Measurement_Flag' in condition.test_info.keys():
+            condition.test_info['Temperature_Measurement_Flag'] = bool(int(condition.test_info['Temperature_Measurement_Flag']))
+        else:
+            condition.test_info['Temperature_Measurement_Flag'] = True
+
+        if 'Charge_Setting_Flag' in condition.test_info.keys():
+            condition.test_info['Charge_Setting_Flag'] = bool(int(condition.test_info['Charge_Setting_Flag']))
+        else:
+            condition.test_info['Charge_Setting_Flag'] = True
+
         return condition

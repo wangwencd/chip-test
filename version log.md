@@ -218,3 +218,6 @@
 - 1.Add saving data function description in Autotest user guide
 - 2.Modify a MCU communication error
 - 3.Modify some functions of instruments.
+
+### 20241111-Add CH347
+- 1.Add CH347 instrument, including I2C, SPI function
