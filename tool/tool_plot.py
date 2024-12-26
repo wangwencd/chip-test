@@ -1053,7 +1053,7 @@ if __name__ == '__main__':
     from test.condition.condition import Condition
     condition = Condition()
 
-    path = r'C:\Users\ww\Desktop\2'
+    path = r'C:\Users\ww\Desktop\3'
 
     condition.config_path = path
     condition.tool_func = 'plot_best_fit'

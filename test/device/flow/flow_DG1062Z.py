@@ -42,10 +42,11 @@ class Flow_DG1062Z(DG1062Z):
         Returns:
             condition: Condition information summary
         """
+        channel = condition.test_info.get('Channel', 1)
         frequency = condition.test_info['Frequency']
         amplitude = condition.test_info['Amplitude']
         offset = condition.test_info['Offset']
-        self.set_channel_sin_parameter(frequency=frequency, amplitude=amplitude, offset=offset)
+        self.set_channel_sin_parameter(frequency=frequency, amplitude=amplitude, offset=offset, channel=channel)
 
         return condition
 
@@ -59,10 +60,11 @@ class Flow_DG1062Z(DG1062Z):
         Returns:
             condition: Condition information summary
         """
+        channel = condition.test_info.get('Channel', 1)
         frequency = condition.test_info['Frequency']
         amplitude = condition.test_info['Amplitude']
         offset = condition.test_info['Offset']
-        self.set_channel_squ_parameter(frequency=frequency, amplitude=amplitude, offset=offset)
+        self.set_channel_squ_parameter(frequency=frequency, amplitude=amplitude, offset=offset, channel=channel)
 
         return condition
 
@@ -90,7 +92,8 @@ class Flow_DG1062Z(DG1062Z):
         Returns:
             condition: Condition information summary
         """
-        self.channel_on()
+        channel = condition.test_info.get('Channel', 1)
+        self.channel_on(channel=channel)
 
         return condition
 
@@ -104,6 +107,23 @@ class Flow_DG1062Z(DG1062Z):
         Returns:
             condition: Condition information summary
         """
-        self.channel_off()
+        channel = condition.test_info.get('Channel', 1)
+        self.channel_off(channel=channel)
+
+        return condition
+
+    def set_channel_dc(self, condition):
+        """
+        Set channel to be DC waveform
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        channel = condition.test_info.get('Channel', 1)
+        offset = condition.test_info['Offset']
+        self.set_channel_dc_parameter(offset=offset, channel=channel)
 
         return condition

@@ -221,3 +221,8 @@
 
 ### 20241111-Add CH347
 - 1.Add CH347 instrument, including I2C, SPI function
+
+### 20241226-Add IT8811 and DG1062Z function
+- 1.Add some function in IT8811
+- 2.Add some function in DG1062Z
+- 3.Update user guide about IT8811 and DG1062Z in custom test.
