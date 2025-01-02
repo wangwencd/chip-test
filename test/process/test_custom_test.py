@@ -102,7 +102,9 @@ class Test_Custom_Test(Control_Flow):
         Returns:
             condition: Condition information summary
         """
-        name = condition.test_info['Info'] + '_' + condition.test_info['Key']
+        name = str(condition.test_info['Instrument']) +\
+               '_' + str(condition.test_info['Info']) +\
+               '_' + str(condition.test_info['Key'])
         if name not in condition.output_info:  # Key not in output_info
             condition.output_info[name] = np.array([])  # Create empty array for Key
 

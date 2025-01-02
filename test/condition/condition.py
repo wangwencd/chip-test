@@ -69,13 +69,7 @@ class Condition(object):
         """
         Reset output info dict to empty
         """
-        self.output_info = {
-            'TTime': np.array([]),
-            'Temperature': np.array([]),
-            'VITime': np.array([]),
-            'Voltage': np.array([]),
-            'Current': np.array([]),
-        }
+        self.output_info = {}
 
     def update_temerature(self, temperature: float):
         """
