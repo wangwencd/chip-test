@@ -16,10 +16,11 @@ class IT8811(SCPI):
     """
     IT8811 control
     """
-    def __init__(self, cls):
-        self.control = cls
-        self.name = 'IT8811'
+    def __init__(self, cls, name=None):
         super().__init__()
+        self.control = cls
+        # self.name = 'IT8811'
+        self.name = name if name else 'IT8811'
 
     def check_error(self):
         """
@@ -282,7 +283,7 @@ class IT8811(SCPI):
         Returns:
             result: Load power value, unit: W
         """
-        command = 'FET:POW?'
+        command = 'FETC:POW?'
         result = self.control.query(command)
         L.debug(self.name + ' power: ' + str(result) + 'W')
         self.check_error()
@@ -298,6 +299,6 @@ class IT8811(SCPI):
 
         command = 'MEAS:VOLT?'
         voltage = self.control.query(command)
-        L.debug(self.name + ' voltage: ' + str(voltage) + 'V, ' + 'IT8811 current: ' + str(current) + 'A')
+        L.debug(self.name + ' voltage: ' + str(voltage) + 'V, ' + self.name + ' current: ' + str(current) + 'A')
 
         return voltage, current

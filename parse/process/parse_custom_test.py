@@ -32,6 +32,7 @@ class Parse_Custom_Test:
         file = File_Operation.find_file(condition.config_path, 'xlsx')
         condition.file = File_Operation.get_dataframe_from_first(file)
         condition = Parse_Custom_Test.parse_file(condition)
+        condition.reset_output_info()
         condition.test_VI_flag = True
         condition.test_T_flag = True
         condition.measurement_flag = True

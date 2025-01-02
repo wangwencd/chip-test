@@ -14,9 +14,10 @@ class Flow_IT8811(IT8811):
     """
     Control flow of IT8811
     """
-    def __init__(self, cls):
+    def __init__(self, cls, name=None):
+        self.name = name if name else 'IT8811'
         self.control = cls
-        super(Flow_IT8811, self).__init__(cls)
+        super(Flow_IT8811, self).__init__(cls, self.name)
 
     def prepare(self, condition):
         """
