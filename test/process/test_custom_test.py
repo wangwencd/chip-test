@@ -85,6 +85,7 @@ class Test_Custom_Test(Control_Flow):
 
                 else:  # Next has a target step.
                     step = int(condition.test_info['Next'])
+                condition.test_info_temp.update(condition.test_info)
                 condition.reset_test_info()
 
             if step > max_step:  # Last step
@@ -102,66 +103,34 @@ class Test_Custom_Test(Control_Flow):
         Returns:
             condition: Condition information summary
         """
+        number = str(condition.test_info.get('Number', ''))
         name = str(condition.test_info['Instrument']) +\
                '_' + str(condition.test_info['Info']) +\
-               '_' + str(condition.test_info['Key'])
+               '_' + str(condition.test_info['Key']) + \
+               number
         if name not in condition.output_info:  # Key not in output_info
             condition.output_info[name] = np.array([])  # Create empty array for Key
 
         if condition.test_info['Key'] is dict:  # Key is a dict
-            condition.output_info[name] = np.append(
-                condition.output_info[name],
-                str(eval('condition.'+condition.test_info['Info'])[condition.test_info['Key']][condition.test_info['Item']])
-            )
+            if re.search('Measure', condition.test_info['Info'], re.I) is not None:
+                condition.output_info[name] = np.append(
+                    condition.output_info[name],
+                    str(eval('condition.measurement_info')[condition.test_info['Key']][condition.test_info['Item']])
+                )
+            elif re.search('Test', condition.test_info['Info'], re.I) is not None:
+                condition.output_info[name] = np.append(
+                    condition.output_info[name],
+                    str(eval('condition.test_info_temp')[condition.test_info['Key']][condition.test_info['Item']])
+                )
         else:  # Key is not a dict
-            condition.output_info[name] = np.append(
-                condition.output_info[name],
-                str(eval('condition.' + condition.test_info['Info'])[condition.test_info['Key']])
-            )
-        return condition
-
-    def measure_VI_thread(self, condition):
-        """
-        Thread func of measuring vol and cur, could measure vol and cur cyclically, which is needed one thread to run.
-
-        Args:
-            condition: Condition information summary
-
-        Returns:
-            condition: Condition information summary
-        """
-        test_info = condition.return_test_info()  # Get measurement info from test info
-
-        while condition.test_VI_flag:
-            if condition.sleep_flag:
-                time.sleep(3)
-            condition.measurement_info = test_info
-            condition = self.measure(condition)  # Measurement function
-            condition.measurement_flag = True  # measuring voltage data updated
-            condition.update_voltage_and_current(condition.measurement_info['Voltage'],
-                                                 condition.measurement_info['Current'])  # Update vol and cur to output
-            condition.update_VI_time(time.perf_counter())  # Update time of measuring vol and cur
-            time.sleep(1)
-
-        return condition
-
-    def measure_T_thread(self, condition):
-        """
-        Thread func of measuring tem, could measure tem cyclically, which is needed one thread to run.
-
-        Args:
-            condition: Condition information summary
-
-        Returns:
-            condition: Condition information summary
-        """
-        test_info = condition.return_test_info()
-
-        while condition.test_T_flag:
-            condition.measurement_info = test_info
-            condition = self.measure(condition)  # Measurement function
-            condition.update_temerature(condition.measurement_info['Temperature'])  # Update tem to output
-            condition.update_T_time(time.perf_counter())  # Update time of measuring tem
-            time.sleep(1)
-
+            if re.search('Measure', condition.test_info['Info'], re.I) is not None:
+                condition.output_info[name] = np.append(
+                    condition.output_info[name],
+                    str(eval('condition.measurement_info')[condition.test_info['Key']])
+                )
+            elif re.search('Test', condition.test_info['Info'], re.I) is not None:
+                condition.output_info[name] = np.append(
+                    condition.output_info[name],
+                    str(eval('condition.test_info_temp')[condition.test_info['Key']])
+                )
         return condition
