@@ -231,3 +231,7 @@
 - 1.Add DL3021 instrument control code
 - 2.Add some function in IT8811
 - 3.Modify some bugs in custom test.
+
+### 20250103-Add multi-column saving function in custom test
+- 1.Add multi-column saving function in custom test
+- 2.Modify test_info saving function bug in custom test.
