@@ -235,3 +235,7 @@
 ### 20250103-Add multi-column saving function in custom test
 - 1.Add multi-column saving function in custom test
 - 2.Modify test_info saving function bug in custom test.
+
+### 20250107-Add IT6722A and IT6835A 
+- 1.Add IT6722A and IT6835A instrument control code
+- 2.Modify condition function bug in custom test, make condition function of all instruments available.

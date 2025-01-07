@@ -240,6 +240,7 @@ class Parse_Custom_Test:
             Returns:
                 Result: True or False
             """
+            item = float(item)
             if re.search('<(?!=)', cond) is not None:  # If a < b
 
                 if item < value:  # Judgements satisfied
