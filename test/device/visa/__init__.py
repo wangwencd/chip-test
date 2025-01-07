@@ -18,6 +18,8 @@ from test.device.flow.flow_DP832 import Flow_DP832
 from test.device.flow.flow_DP932 import Flow_DP932
 from test.device.flow.flow_DP932U import Flow_DP932U
 from test.device.flow.flow_DL3021 import Flow_DL3021
+from test.device.flow.flow_IT6722A import Flow_IT6722A
+from test.device.flow.flow_IT6835A import Flow_IT6835A
 
 Instrument_Dict = {
     'Device name': 'Device ID',
@@ -33,6 +35,8 @@ Instrument_Dict = {
     'DP932': 'USB0::0x1AB1::0xA4A8::DP9A250700055::INSTR',
     'DP932U': 'USB0::0x1AB1::0xA4A8::DP9C244601100::INSTR',
     'DL3021': 'USB0::0x1AB1::0x0E11::DL3A262700628::INSTR',
+    'IT6722A': 'USB0::0x2EC7::0x6700::802259073787270169::INSTR',
+    'IT6835A': 'USB0::0x2EC7::0x6800::802591023787410002::INSTR',
 }
 
 Instrument_Class = {
@@ -49,6 +53,8 @@ Instrument_Class = {
     'DP932': Flow_DP932,
     'DP932U': Flow_DP932U,
     'DL3021': Flow_DL3021,
+    'IT6722A': Flow_IT6722A,
+    'IT6835A': Flow_IT6835A,
 }
 
 def determine_instrument(instrument_name: str):
