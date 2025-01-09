@@ -473,7 +473,7 @@ class Instrumentwindow_Control(QWidget, Ui_ui_instrumentwindow):
             if self.lineEdit_IT8811_set_cc_mode_min_voltage.text() != '':
                 # Set min voltage of CC mode
                 flow.set_CC_mode_min_voltage(
-                    self.lineEdit_IT8811_set_cc_mode_max_voltage.text()  # Voltage value
+                    self.lineEdit_IT8811_set_cc_mode_min_voltage.text()  # Voltage value
                 )
 
         """set_cr_mode"""
@@ -1353,4 +1353,152 @@ class Instrumentwindow_Control(QWidget, Ui_ui_instrumentwindow):
                     self.lineEdit_DP932U_self_defined_read.text()  # Read command
                 )
                 L.info(str(result))
+
+    def set_DL3021(self, flow):
+        """
+        Operate DL3021 instrument, according to instrument window ui
+
+        Args:
+            flow: Class of DL3021 control
+        """
+        name = self.tabWidget_DL3021.currentWidget().objectName()  # Return specific function of instrument
+
+        """channel_option"""
+        if re.search('channel_option', name, re.I) is not None:
+
+            if re.search('ON', self.comboBox_DL3021_channel_option_switch.currentText(), re.I) is not None:
+                # Channel on
+                flow.channel_on()
+
+            elif re.search('OFF', self.comboBox_DL3021_channel_option_switch.currentText(), re.I) is not None:
+                # Channel off
+                flow.channel_off()
+
+        """enable_remote"""
+        if re.search('enable_remote', name, re.I) is not None:
+            flow.enable_remote()
+
+        """query_parameter"""
+        if re.search('query_parameter', name, re.I) is not None:
+
+            if re.search(
+                    'Voltage and Current', self.comboBox_DL3021_query_parameter_parameter.currentText(), re.I
+            ) is not None:
+                # Query voltage and current
+                flow.query_all()
+
+            elif re.search('Power', self.comboBox_DL3021_query_parameter_parameter.currentText(), re.I) is not None:
+                # Query power
+                flow.query_power()
+
+        """set_cv_mode"""
+        if re.search('set_cv_mode', name, re.I) is not None:
+            flow.enter_CV_mode()
+
+            if self.lineEdit_DL3021_set_cv_mode_voltage.text() != '':
+                # Set voltage of CV mode
+                flow.set_CV_mode_voltage(
+                    self.lineEdit_DL3021_set_cv_mode_voltage.text()  # Voltage value
+                )
+
+            if self.lineEdit_DL3021_set_cv_mode_max_current.text() != '':
+                # Set max current of CV mode
+                flow.set_CV_mode_max_current(
+                    self.lineEdit_DL3021_set_cv_mode_max_current.text()  # Current value
+                )
+
+            if self.lineEdit_DL3021_set_cv_mode_min_current.text() != '':
+                # Set min current of CV mode
+                flow.set_CV_mode_min_current(
+                    self.lineEdit_DL3021_set_cv_mode_min_current.text()  # Current value
+                )
+
+        """set_cc_mode"""
+        if re.search('set_cc_mode', name, re.I) is not None:
+            flow.enter_CC_mode()
+
+            if self.lineEdit_DL3021_set_cc_mode_current.text() != '':
+                # Set current of CC mode
+                flow.set_CC_mode_current(
+                    self.lineEdit_DL3021_set_cc_mode_current.text()  # Current value
+                )
+
+            if self.lineEdit_DL3021_set_cc_mode_max_voltage.text() != '':
+                # Set max voltage of CC mode
+                flow.set_CC_mode_max_voltage(
+                    self.lineEdit_DL3021_set_cc_mode_max_voltage.text()  # Voltage value
+                )
+
+            if self.lineEdit_DL3021_set_cc_mode_min_voltage.text() != '':
+                # Set min voltage of CC mode
+                flow.set_CC_mode_min_voltage(
+                    self.lineEdit_DL3021_set_cc_mode_min_voltage.text()  # Voltage value
+                )
+
+        """set_cr_mode"""
+        if re.search('set_cr_mode', name, re.I) is not None:
+            flow.enter_CR_mode()
+
+            if self.lineEdit_DL3021_set_cr_mode_resistance.text() != '':
+                # Set resistance of CR mode
+                flow.set_CR_mode_resistance(
+                    self.lineEdit_DL3021_set_cr_mode_resistance.text()  # Resistance value
+                )
+
+            if self.lineEdit_DL3021_set_cr_mode_max_voltage.text() != '':
+                # Set max voltage of CR mode
+                flow.set_CR_mode_max_voltage(
+                    self.lineEdit_DL3021_set_cr_mode_max_voltage.text()  # Voltage value
+                )
+
+            if self.lineEdit_DL3021_set_cr_mode_min_voltage.text() != '':
+                # Set min voltage of CR mode
+                flow.set_CR_mode_min_voltage(
+                    self.lineEdit_DL3021_set_cr_mode_min_voltage.text()  # Voltage value
+                )
+
+        """set_cw_mode"""
+        if re.search('set_cw_mode', name, re.I) is not None:
+            flow.enter_CW_mode()
+
+            if self.lineEdit_DL3021_set_cw_mode_power.text() != '':
+                # Set power of CW mode
+                flow.set_CW_mode_power(
+                    self.lineEdit_DL3021_set_cw_mode_power.text()  # Power value
+                )
+
+            if self.lineEdit_DL3021_set_cw_mode_max_voltage.text() != '':
+                # Set max voltage of CW mode
+                flow.set_CW_mode_max_voltage(
+                    self.lineEdit_DL3021_set_cw_mode_max_voltage.text()  # Voltage value
+                )
+
+            if self.lineEdit_DL3021_set_cw_mode_min_voltage.text() != '':
+                # Set min voltage of CW mode
+                flow.set_CW_mode_min_voltage(
+                    self.lineEdit_DL3021_set_cw_mode_min_voltage.text()  # Voltage value
+                )
+
+            """self_defined"""
+            if re.search('self_defined', name, re.I) is not None:
+
+                if self.lineEdit_DL3021_self_defined_query.text() != '':
+                    # Query
+                    result = flow.control.query(
+                        self.lineEdit_DL3021_self_defined_query.text()  # Query command
+                    )
+                    L.info(str(result))
+
+                if self.lineEdit_DL3021_self_defined_write.text() != '':
+                    # Write
+                    flow.control.write(
+                        self.lineEdit_DL3021_self_defined_write.text()  # Write command
+                    )
+
+                if self.lineEdit_DL3021_self_defined_read.text() != '':
+                    # Read
+                    result = flow.control.read(
+                        self.lineEdit_DL3021_self_defined_read.text()  # Read command
+                    )
+                    L.info(str(result))
 

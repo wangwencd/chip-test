@@ -16,3 +16,4 @@ class IT6835A(IT6722A):
     def __init__(self, cls, name=None):
         self.control = cls
         super().__init__(cls, self.name)
+        self.name = name if name else 'IT6835A'
