@@ -239,3 +239,7 @@
 ### 20250107-Add IT6722A and IT6835A 
 - 1.Add IT6722A and IT6835A instrument control code
 - 2.Modify condition function bug in custom test, make condition function of all instruments available.
+
+### 20250109-Add DL3021 instrument control UI 
+- 1.Add DL3021 instrument control UI
+- 2.Update __init__ function of DL3021, IT8811, IT6722A, IT6835A, make the correct instrument name is showing on the log.

@@ -17,9 +17,8 @@ class DL3021(IT8811):
     """
     def __init__(self, cls, name=None):
         self.control = cls
-        # self.name = 'DL3021'
         super().__init__(cls, self.name)
-        # self.name = name if name else 'DL3021'
+        self.name = name if name else 'DL3021'
 
     def set_CC_mode_max_voltage(self, value):
         """

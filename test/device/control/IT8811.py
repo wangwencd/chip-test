@@ -19,7 +19,6 @@ class IT8811(SCPI):
     def __init__(self, cls, name=None):
         super().__init__()
         self.control = cls
-        # self.name = 'IT8811'
         self.name = name if name else 'IT8811'
 
     def check_error(self):

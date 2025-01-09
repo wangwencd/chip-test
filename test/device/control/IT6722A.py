@@ -19,6 +19,7 @@ class IT6722A(SCPI):
     def __init__(self, cls, name=None):
         super().__init__()
         self.control = cls
+        self.name = name if name else 'IT6722A'
 
     def check_error(self):
         """
