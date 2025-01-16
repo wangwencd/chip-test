@@ -33,9 +33,9 @@ class Parse_Custom_Test:
         condition.file = File_Operation.get_dataframe_from_first(file)
         condition = Parse_Custom_Test.parse_file(condition)
         condition.reset_output_info()
+        condition.output_info['Time'] = np.array([])
         condition.test_info_temp = {}
-        condition.test_VI_flag = True
-        condition.test_T_flag = True
+        condition.test_flag = True
         condition.measurement_flag = True
 
         return condition
