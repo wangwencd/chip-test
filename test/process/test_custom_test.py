@@ -104,18 +104,20 @@ class Test_Custom_Test(Control_Flow):
             condition: Condition information summary
         """
         number = str(condition.test_info.get('Number', ''))
-        name = str(condition.test_info['Instrument']) +\
-               '_' + str(condition.test_info['Info']) +\
-               '_' + str(condition.test_info['Key']) + \
+        name = str(condition.test_info.get('Instrument', '')) + \
+               str(condition.test_info.get('Info', '')) +\
+               str(condition.test_info.get('Key', '')) + \
                number
         if name not in condition.output_info:  # Key not in output_info
             condition.output_info[name] = np.array([])  # Create empty array for Key
 
-        condition.output_info['Time'] = np.append(
-            condition.output_info['Time'],
+        if re.search('time', condition.test_info['Info'], re.I) is not None:
+            condition.output_info[name] = np.append(
+            condition.output_info[name],
             time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         )
-        if condition.test_info['Key'] is dict:  # Key is a dict
+
+        elif condition.test_info['Key'] is dict:  # Key is a dict
             if re.search('Measure', condition.test_info['Info'], re.I) is not None:
                 condition.output_info[name] = np.append(
                     condition.output_info[name],
