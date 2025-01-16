@@ -240,6 +240,13 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         """
         Stop program.
         """
+        self.pushButton_start_start.setEnabled(True)
+        self.cond.test_flag = False
+        self.pushButton_start_stop.setEnabled(True)
+        self.pushButton_start_stop.setAutoExclusive(False)
+        self.pushButton_start_stop.setChecked(False)
+        self.pushButton_start_stop.setAutoExclusive(True)
+
 
     def get_message(self, message):
         """

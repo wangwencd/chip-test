@@ -62,7 +62,7 @@ class Test_Custom_Test(Control_Flow):
         step = int(condition.file.iloc[0]['Step'])
         max_step = int(condition.file.iloc[-1]['Step'])  # Get max step number from test file
 
-        while True:
+        while condition.test_flag:
             condition.start_time = time.time()
             condition.condition_flag = True
 
@@ -91,7 +91,7 @@ class Test_Custom_Test(Control_Flow):
             if step > max_step:  # Last step
                 break
 
-        condition.test_flag = False
+        condition.test_flag = True
         return condition
     def exec_save(self, condition):
         """
@@ -111,6 +111,10 @@ class Test_Custom_Test(Control_Flow):
         if name not in condition.output_info:  # Key not in output_info
             condition.output_info[name] = np.array([])  # Create empty array for Key
 
+        condition.output_info['Time'] = np.append(
+            condition.output_info['Time'],
+            time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        )
         if condition.test_info['Key'] is dict:  # Key is a dict
             if re.search('Measure', condition.test_info['Info'], re.I) is not None:
                 condition.output_info[name] = np.append(

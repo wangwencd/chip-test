@@ -243,3 +243,8 @@
 ### 20250109-Add DL3021 instrument control UI 
 - 1.Add DL3021 instrument control UI
 - 2.Update __init__ function of DL3021, IT8811, IT6722A, IT6835A, make the correct instrument name is showing on the log.
+
+### 20250116-Add stop function
+- 1.Add stop function in custom test
+- 2.Add current time recording function when saving data in custom test
+- 3.Update user guide about stop function.
