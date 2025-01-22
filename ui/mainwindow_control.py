@@ -200,6 +200,7 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         # t1 = threading.Thread(target=self.start)
         # t1.daemon = True
         # t1.start()
+        self.progressBar_item.setValue(0)
         future = pool.submit(self.start)
 
     def start(self):
@@ -207,7 +208,6 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         Specific items in program.
         """
         self.pushButton_start_start.setEnabled(False)
-        self.progressBar_item.setValue(0)
         try:
             """Parsing step"""
             for key, value in Parse_Process_Dict.items():  # Choose parsing
