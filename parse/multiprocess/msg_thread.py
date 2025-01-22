@@ -17,8 +17,9 @@ class Msg_Thread(QThread):
     """
     Message threading class
     """
-    signal1 = pyqtSignal(str) # A signal with type str
-    signal2 = pyqtSignal(bool) # A signal with type bool
+    signal1 = pyqtSignal(str)  # A signal with type str
+    signal2 = pyqtSignal(bool)  # A signal with type bool
+    signal3 = pyqtSignal(float)  # A signal with type float
 
     def __init__(self):
         """
@@ -39,3 +40,7 @@ class Msg_Thread(QThread):
             elif isinstance(message, bool):
                 print('bool')
                 self.signal2.emit(message)
+
+            elif isinstance(message, float):
+                self.signal3.emit(message)
+

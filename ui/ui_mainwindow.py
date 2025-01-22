@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ui_MainWindow(object):
     def setupUi(self, ui_MainWindow):
         ui_MainWindow.setObjectName("ui_MainWindow")
-        ui_MainWindow.resize(967, 855)
+        ui_MainWindow.resize(934, 855)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -265,10 +265,15 @@ class Ui_ui_MainWindow(object):
         self.textBrowser_log.setObjectName("textBrowser_log")
         self.gridLayout_8.addWidget(self.textBrowser_log, 2, 0, 1, 1)
         self.gridLayout_7.addWidget(self.groupBox_log, 2, 0, 1, 1)
+        self.progressBar_item = QtWidgets.QProgressBar(self.widget_log)
+        self.progressBar_item.setProperty("value", 0)
+        self.progressBar_item.setAlignment(QtCore.Qt.AlignCenter)
+        self.progressBar_item.setObjectName("progressBar_item")
+        self.gridLayout_7.addWidget(self.progressBar_item, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.widget_log, 3, 0, 1, 2)
         ui_MainWindow.setCentralWidget(self.widget_main)
         self.menubar = QtWidgets.QMenuBar(ui_MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 967, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 934, 23))
         self.menubar.setStyleSheet("background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(240, 240, 240, 255), stop:1 rgba(255, 255, 255, 255));")
         self.menubar.setObjectName("menubar")
         self.menu_debug = QtWidgets.QMenu(self.menubar)
@@ -294,7 +299,7 @@ class Ui_ui_MainWindow(object):
 
     def retranslateUi(self, ui_MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        ui_MainWindow.setWindowTitle(_translate("ui_MainWindow", "Transepic_AutoTest_V2.08.00 "))
+        ui_MainWindow.setWindowTitle(_translate("ui_MainWindow", "Transepic_AutoTest_V2.10.00 "))
         self.groupBox.setTitle(_translate("ui_MainWindow", "Function"))
         self.radioButton_battery_lab.setText(_translate("ui_MainWindow", "Battery lab"))
         self.toolBox_function.setItemText(self.toolBox_function.indexOf(self.page_battery_lab), _translate("ui_MainWindow", "Battery lab"))

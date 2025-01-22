@@ -47,18 +47,7 @@ class Flow_E36312A(E36312A):
         channel = str(condition.test_info['Channel'])
         voltage = condition.test_info['Voltage']
         current = condition.test_info['Current']
-
-        if channel == '1' or channel == '2' or channel == '3':
-            self.enter_independent_mode()
-            self.set_channel_voltage_current(voltage, current, channel=channel)
-
-        elif re.search('2\+3', channel) is not None:
-            self.enter_series_mode()
-            self.set_channel_voltage_current(voltage, current)
-
-        elif re.search('2\|3', channel) is not None:
-            self.enter_parallel_mode()
-            self.set_channel_voltage_current(voltage, current)
+        self.set_channel_voltage_current(voltage, current, channel=channel)
 
         return condition
 
@@ -76,12 +65,7 @@ class Flow_E36312A(E36312A):
             channel = str(condition.measurement_info['Channel'])
         except:
             channel = str(condition.test_info['Channel'])
-
-        if channel == '1' or channel == '2' or channel == '3':
-            voltage, current = self.query_channel_all(channel)
-
-        elif re.search('(2\+3)|(2\|3)', channel) is not None:
-            voltage, current = self.query_channel_all()
+        voltage, current = self.query_channel_all(channel)
 
         condition.measurement_info['Voltage'] = voltage
         condition.measurement_info['Current'] = current
@@ -99,12 +83,7 @@ class Flow_E36312A(E36312A):
             condition: Condition information summary
         """
         channel = str(condition.test_info['Channel'])
-
-        if channel == '1' or channel == '2' or channel == '3':
-            self.channel_on(channel=channel)
-
-        elif re.search('(2\+3)|(2\|3)', channel) is not None:
-            self.channel_on()
+        self.channel_on(channel=channel)
 
         return condition
 
@@ -119,12 +98,7 @@ class Flow_E36312A(E36312A):
             condition: Condition information summary
         """
         channel = str(condition.test_info['Channel'])
-
-        if channel == '1' or channel == '2' or channel == '3':
-            self.channel_off(channel=channel)
-
-        elif re.search('(2\+3)|(2\|3)', channel) is not None:
-            self.channel_off()
+        self.channel_off(channel=channel)
 
         return condition
 
@@ -154,18 +128,7 @@ class Flow_E36312A(E36312A):
         """
         channel = str(condition.test_info['Channel'])
         voltage = condition.test_info['Voltage']
-
-        if channel == '1' or channel == '2' or channel == '3':
-            self.enter_independent_mode()
-            self.set_channel_voltage(voltage, channel=channel)
-
-        elif re.search('2\+3', channel) is not None:
-            self.enter_series_mode()
-            self.set_channel_voltage(voltage)
-
-        elif re.search('2\|3', channel) is not None:
-            self.enter_parallel_mode()
-            self.set_channel_voltage(voltage)
+        self.set_channel_voltage(voltage, channel=channel)
 
         return condition
 
@@ -182,17 +145,48 @@ class Flow_E36312A(E36312A):
         channel = str(condition.test_info['Channel'])
         current = condition.test_info['Current']
 
-        if channel == '1' or channel == '2' or channel == '3':
-            self.enter_independent_mode()
-            self.set_channel_current(current, channel=channel)
-
-        elif re.search('2\+3', channel) is not None:
-            self.enter_series_mode()
-            self.set_channel_current(current)
-
-        elif re.search('2\|3', channel) is not None:
-            self.enter_parallel_mode()
-            self.set_channel_current(current)
+        self.set_channel_current(current, channel=channel)
 
         return condition
 
+    def enter_independent(self, condition):
+        """
+        Enter independent mode
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        self.enter_independent_mode()
+
+        return condition
+
+    def enter_series(self, condition):
+        """
+        Enter series mode , channel 2+3
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        self.enter_series_mode()
+
+        return condition
+
+    def enter_parallel(self, condition):
+        """
+        Enter parallel mode , channel 2|3
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+        self.enter_parallel_mode()
+
+        return condition

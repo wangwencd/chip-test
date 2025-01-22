@@ -76,6 +76,7 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         self.action_userguide.triggered.connect(self.show_userguide)  # User guide action slot function
 
         self.msg.signal1.connect(self.get_message)
+        self.msg.signal3.connect(self.get_progress)
         """Show UI interface"""
         self.show()
 
@@ -206,6 +207,7 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         Specific items in program.
         """
         self.pushButton_start_start.setEnabled(False)
+        self.progressBar_item.setValue(0)
         try:
             """Parsing step"""
             for key, value in Parse_Process_Dict.items():  # Choose parsing
@@ -246,7 +248,7 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         self.pushButton_start_stop.setAutoExclusive(False)
         self.pushButton_start_stop.setChecked(False)
         self.pushButton_start_stop.setAutoExclusive(True)
-
+        self.progressBar_item.setValue(0)
 
     def get_message(self, message):
         """
@@ -366,3 +368,9 @@ class Mainwindow_Control(QMainWindow, Ui_ui_MainWindow):
         path = self.path + '/guide'
         file_list = File_Operation.find_file(path, 'pdf')
         os.startfile(file_list[0])
+
+    def get_progress(self, message):
+        """
+        Get progress from queue, show progress.
+        """
+        self.progressBar_item.setValue(int(message))

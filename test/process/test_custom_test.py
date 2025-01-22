@@ -11,6 +11,7 @@ import time
 import logging
 from test.device.flow.control_flow import Control_Flow
 from parse.process.parse_custom_test import Parse_Custom_Test
+from parse.multiprocess.queue import Q
 
 L = logging.getLogger('Main')
 
@@ -67,6 +68,7 @@ class Test_Custom_Test(Control_Flow):
             condition.condition_flag = True
 
             while condition.condition_flag:
+                Q.put(round((step/max_step) * 100, 0))  # calculate progress and send to queue
                 condition.test_info = (
                     condition.file.loc[condition.file['Step'] == step].iloc[-1]
                 ).to_dict()  # Get test info according to target step, then convert into a dict

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>967</width>
+    <width>934</width>
     <height>855</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Transepic_AutoTest_V2.08.00 </string>
+   <string>Transepic_AutoTest_V2.10.00 </string>
   </property>
   <property name="styleSheet">
    <string notr="true">
@@ -529,6 +529,16 @@ QLineEdit:hover{
          </layout>
         </widget>
        </item>
+       <item row="0" column="0">
+        <widget class="QProgressBar" name="progressBar_item">
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -539,7 +549,7 @@ QLineEdit:hover{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>967</width>
+     <width>934</width>
      <height>23</height>
     </rect>
    </property>
