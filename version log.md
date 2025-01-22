@@ -248,3 +248,8 @@
 - 1.Add stop function in custom test
 - 2.Add current time recording function when saving data in custom test
 - 3.Update user guide about stop function.
+
+### 20250122-Add IT8811B and progressBar
+- 1.Add progressBar in main UI, show the progress in custom test
+- 2.Add IT8811B instrument control code, same as IT8811
+- 3.Modify E36312A instrument control code bug, add switching mode function.
