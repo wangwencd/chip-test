@@ -65,9 +65,9 @@ class Test_Custom_Test(Control_Flow):
 
         while condition.test_flag:
             condition.start_time = time.time()
-            condition.condition_flag = True
+            condition.condition_flag = False
 
-            while condition.condition_flag:
+            while not condition.condition_flag:
                 Q.put(round((step/max_step) * 100, 0))  # calculate progress and send to queue
                 condition.test_info = (
                     condition.file.loc[condition.file['Step'] == step].iloc[-1]
@@ -77,18 +77,18 @@ class Test_Custom_Test(Control_Flow):
                     time.sleep(float(condition.test_info['Time']))
                 condition = self.exec_func(condition)
                 condition = Parse_Custom_Test.parse_condition(condition)
+                condition = Parse_Custom_Test.parse_next(condition)
 
-                if condition.condition_flag:  # Judgements not satisfied
+                if not condition.condition_flag and step == condition.step:  # Judgements not satisfied and step not changed
+                    condition.test_info_temp.update(condition.test_info)
                     condition.reset_test_info()
                     continue
 
-                if condition.test_info['Next'] != condition.test_info['Next']:  # Next is nan
-                    step = int(condition.test_info['Step']) + 1
-
-                else:  # Next has a target step.
-                    step = int(condition.test_info['Next'])
+                else:  # Step changed
+                    step = condition.step
                 condition.test_info_temp.update(condition.test_info)
                 condition.reset_test_info()
+                condition.condition_flag = True
 
             if step > max_step:  # Last step
                 break
