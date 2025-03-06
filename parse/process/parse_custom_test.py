@@ -62,6 +62,8 @@ class Parse_Custom_Test:
         Returns:
             condition: Condition information summary
         """
+        """Reset judgement flag to False"""
+        condition.judgement_flag = False
         """Get Condition info of this step"""
         # condition.test_info = condition.test_info.to_dict()
         string = str(condition.test_info['Condition'])
@@ -90,7 +92,8 @@ class Parse_Custom_Test:
             #     pos_right.append(index) if value == '(' else pos_right
 
         if element_num == 0:  # Num is 0
-            condition.condition_flag = False
+            condition.judgement_flag = False
+            condition.condition_flag = True
 
         elif element_num == 1:  # Num is 1
             result = Parse_Custom_Test.judge_one(
@@ -101,9 +104,10 @@ class Parse_Custom_Test:
             )  # Get result of 1st judgement
 
             if result:  # Judgements satisfied
-                condition.condition_flag = False
-            else:  # Judgements not satisfied
                 condition.condition_flag = True
+            else:  # Judgements not satisfied
+                condition.condition_flag = False
+            condition.judgement_flag = True
 
         elif element_num == 2:  # Num is 2
 
@@ -123,16 +127,17 @@ class Parse_Custom_Test:
             if condition.test_info['condition_method_0'] == ',':  # Format is: If a and b
 
                 if result0 and result1:  # Judgements satisfied
-                    condition.condition_flag = False
-                else:  # Judgements not satisfied
                     condition.condition_flag = True
+                else:  # Judgements not satisfied
+                    condition.condition_flag = False
 
             elif condition.test_info['condition_method_0'] == ';':  # Format is: If a or b
 
                 if result0 or result1:  # Judgements satisfied
-                    condition.condition_flag = False
-                else:  # Judgements not satisfied
                     condition.condition_flag = True
+                else:  # Judgements not satisfied
+                    condition.condition_flag = False
+            condition.judgement_flag = True
 
         elif element_num == 3:  # Num is 3
 
@@ -159,17 +164,17 @@ class Parse_Custom_Test:
                     and condition.test_info['condition_method_1'] == ',':  # Format is: If a and b and c
 
                 if result0 and result1 and result2:  # Judgements satisfied
-                    condition.condition_flag = False
-                else:  # Judgements not satisfied
                     condition.condition_flag = True
+                else:  # Judgements not satisfied
+                    condition.condition_flag = False
 
             elif condition.test_info['condition_method_0'] == ';' \
                     and condition.test_info['condition_method_1'] == ';':  # Format is: If a or b or c
 
                 if result0 or result1 or result2:  # Judgements satisfied
-                    condition.condition_flag = False
-                else:  # Judgements not satisfied
                     condition.condition_flag = True
+                else:  # Judgements not satisfied
+                    condition.condition_flag = False
 
             elif condition.test_info['condition_method_0'] == ',' \
                     and condition.test_info['condition_method_1'] == ';':  # Format is: If a and b or c
@@ -177,16 +182,16 @@ class Parse_Custom_Test:
                 if condition.test_info['position'] == '1,2':  # Format is: If (a and b) or c
 
                     if (result0 and result1) or result2:  # Judgements satisfied
-                        condition.condition_flag = False
-                    else:  # Judgements not satisfied
                         condition.condition_flag = True
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = False
 
                 elif condition.test_info['position'] == '2,3':  # Format is: If a and (b or c)
 
                     if result0 and (result1 or result2):  # Judgements satisfied
-                        condition.condition_flag = False
-                    else:  # Judgements not satisfied
                         condition.condition_flag = True
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = False
 
                 else:
                     raise ValueError
@@ -197,19 +202,20 @@ class Parse_Custom_Test:
                 if condition.test_info['position'] == '1,2':  # Format is: If (a or b) and c
 
                     if (result0 or result1) and result2:  # Judgements satisfied
-                        condition.condition_flag = False
-                    else:  # Judgements not satisfied
                         condition.condition_flag = True
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = False
 
                 elif condition.test_info['position'] == '2,3':  # Format is: If a or (b and c)
 
                     if result0 or (result1 and result2):  # Judgements satisfied
-                        condition.condition_flag = False
-                    else:  # Judgements not satisfied
                         condition.condition_flag = True
+                    else:  # Judgements not satisfied
+                        condition.condition_flag = False
 
                 else:
                     raise ValueError
+            condition.judgement_flag = True
 
         return condition
 
@@ -433,8 +439,8 @@ class Parse_Custom_Test:
         if parameter != parameter or parameter == 'nan':  # parameter is nan
             return np.nan
 
-        elif re.match('\d+', parameter) is not None:  # parameter is a number
-            result.extend(parameter)
+        elif re.fullmatch('\d+', parameter) is not None:  # parameter is a number
+            result.append(int(parameter))
 
         elif re.match('{|}', parameter) is not None:  # parameter is a small cycle
             result = \
@@ -443,6 +449,14 @@ class Parse_Custom_Test:
                         int, re.findall('\d+', parameter)
                     )
                 )  # Get all cycle step and convert into a list
+
+        elif re.search('\d+;\d+', parameter) is not None:  # parameter is a condition branch
+            result = \
+                    [list(
+                        map(
+                            int, re.findall('\d+', parameter)
+                        )
+                    )]  # Get all branch and convert into a list
 
         return result
 
@@ -492,26 +506,17 @@ class Parse_Custom_Test:
         """Extend Next function"""
         for i in range(len(new_file.index)):
             this_line = copy_deep(new_file.loc[new_file.index == i])
-            # this_line = (new_file.loc[new_file.index == i]).copy(deep=True)
             next = this_line.at[i, 'Next']
             if next != next or len(next) <= 1:
                 target_file_temp.append(this_line)  # Append this test item of file to new file
             elif len(next) > 1:  # A cycle in Next
                 for j in range(len(next)):
                     if this_line.at[i, 'Step'] == next[j]:  # Current line is the line that needed to add
-                        # temp = this_line.copy(deep=True)
                         temp = copy_deep(this_line)
                         temp.at[i, 'Next'] = np.nan
-                        """Solve the problem of nested object sharing"""
-                        # temp.at[i, 'Function'] = copy.deepcopy(this_line.at[i, 'Function'])
-                        # temp.at[i, 'Parameter'] = copy.deepcopy(this_line.at[i, 'Parameter'])
                     else:  # Current line is not the line that needed to add
-                        # temp = (new_file.loc[new_file['Step'] == next[j]]).copy(deep=True)
                         temp = copy_deep(new_file.loc[new_file['Step'] == next[j]])
-                        temp.at[temp.index[0], 'Next'] = np.nan
-                        """Solve the problem of nested object sharing"""
-                        # temp.at[temp.index[0], 'Function'] = copy.deepcopy(temp.at[temp.index[0], 'Function'])
-                        # temp.at[temp.index[0], 'Parameter'] = copy.deepcopy(temp.at[temp.index[0], 'Parameter'])
+                        # temp.at[temp.index[0], 'Next'] = np.nan
                     target_file_temp.append(temp)  # Append this test item of file to new file
             else:  # No cycle in Next
                 target_file_temp.append(this_line)  # Append this test item of file to new file
@@ -519,6 +524,15 @@ class Parse_Custom_Test:
         target_file.reset_index(drop=True, inplace=True)  # Reset index of dataframe
         t3 = time.time()
         print(t3 - t2)
+        """Change Next according to target file"""
+        for i in range(len(target_file.index)):
+            next_value = copy_deep(target_file.loc[target_file.index == i]).at[i, 'Next']
+            if next_value == next_value:  # If next value is not nan
+                if isinstance(next_value[0], int):  # int type
+                    target_file.loc[i, 'Next'] = target_file.loc[target_file['Step'] == next_value[0]].head(1).index[0]  # Update next value according to new file
+                elif isinstance(next_value[0], list):  # list type
+                    for j in range(len(next_value[0])):
+                        target_file.loc[i, 'Next'][0][j] = target_file.loc[target_file['Step'] == next_value[0][j]].head(1).index[0]  # Update next value according to new file
         """Update test file information"""
         for i in range(len(target_file.index)):
             target_file.at[i, 'Step'] = i
@@ -593,7 +607,56 @@ class Parse_Custom_Test:
             if parameter is []:
                 parameter = np.nan  # To format: np.nan
 
-            else:
+            elif isinstance(parameter[0], int):
                 parameter = int(parameter[0])  # To format: A(int)
 
+            elif isinstance(parameter[0], list):
+                parameter = parameter[0]
+
         return parameter
+
+
+    @staticmethod
+    def parse_next(condition):
+        """
+        Analyze the step in Next and condition_flag, decide how much the next step is.
+
+        Args:
+            condition: Condition information summary
+
+        Returns:
+            condition: Condition information summary
+        """
+
+        if condition.judgement_flag and not condition.condition_flag:  # Judgements are made and not satisfied
+            if condition.test_info['Next'] != condition.test_info['Next']:  # Next is nan
+                step = int(condition.test_info['Step'])  # step = current step
+
+            elif isinstance(condition.test_info['Next'], int):  # Next is int
+                step = int(condition.test_info['Step'])  # step = current step
+
+            else:  # Next is list
+                step = int(condition.test_info['Next'][-1])  # step = the last number
+
+        elif condition.judgement_flag and condition.condition_flag:   # Judgements are made and satisfied
+            if condition.test_info['Next'] != condition.test_info['Next']:  # Next is nan
+                step = int(condition.test_info['Step']) + 1  # step = current step + 1
+
+            elif isinstance(condition.test_info['Next'], int):  # Next is int
+                step = int(condition.test_info['Next'])  # step = next number
+
+            else:  # Next is list
+                step = int(condition.test_info['Next'][0])  # step = the first number
+
+        elif not condition.judgement_flag:  # Judgements are not made
+            if condition.test_info['Next'] != condition.test_info['Next']:  # Next is nan
+                step = int(condition.test_info['Step']) + 1  # step = current step + 1
+
+            elif isinstance(condition.test_info['Next'], int):  # Next is int
+                step = int(condition.test_info['Next'])  # step = next number
+
+            else:  # Next is list
+                step = int(condition.test_info['Next'][0])  # step = the first number
+        condition.step = step
+
+        return condition

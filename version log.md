@@ -253,3 +253,7 @@
 - 1.Add progressBar in main UI, show the progress in custom test
 - 2.Add IT8811B instrument control code, same as IT8811
 - 3.Modify E36312A instrument control code bug, add switching mode function.
+
+### 20250306-Add condition branch function
+- 1.Add condition branch function in custom test, the preset step would be accomplished according to the condition result.
+- 2.Modify some bug in parse_custom_test.
