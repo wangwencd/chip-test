@@ -48,7 +48,7 @@ def Standby_GO_unpack(buf):
     return buf
 
 
-def SYSTEM_RESET_pack(buf):
+def SYSTEM_RESET_pack(**kwargs):
     return bytes(0)
 
 

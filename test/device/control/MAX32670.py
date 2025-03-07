@@ -132,7 +132,7 @@ class MAX32670(object):
         return proto_info
 
     def reset(self, msg):
-        proto_info = PBCore.com_transimit_write(
+        proto_info = self.com_transimit_write(
             proto_type='SYSTEM_RESET'
         )
         self.parse_result(proto_info, 5)
