@@ -74,7 +74,7 @@ class Parse_Custom_Test:
         for index, value in enumerate(re.findall(',|;', string)):
             condition.test_info['condition_method' + '_' + str(index)] = value
         """Get every judgement info, including judgement item, method, target value"""
-        for index, value in enumerate(re.findall('\w+[ ]?(?:<|>|<=|>=|==|\!=)[ ]?\d+[\.]?\d*', string)):
+        for index, value in enumerate(re.findall('\w+[ ]?(?:<|>|<=|>=|==|\!=)[ ]?-?\d+[\.]?\d*', string)):
             [
                 condition.test_info['judgement_item' + '_' + str(index)], # Get judgement item
                 condition.test_info['judgement_method' + '_' + str(index)], # Get judgement method

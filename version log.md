@@ -257,3 +257,6 @@
 ### 20250306-Add condition branch function
 - 1.Add condition branch function in custom test, the preset step would be accomplished according to the condition result.
 - 2.Modify some bug in parse_custom_test.
+
+### 20250403-modify error in parse_custom_test
+- 1.Modify condition judgement error, could recognize negative symbol.
